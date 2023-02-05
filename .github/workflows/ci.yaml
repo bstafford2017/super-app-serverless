@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout source code
+        uses: actions/checkout@v2
 
       - name: Use Node.js
         uses: actions/setup-node@v2
@@ -21,3 +22,19 @@ jobs:
 
       - name: Run test
         run: npm test
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Serverless package
+        run: npx serverless package
+
+      - name: Serverless deploy
+        run: npx serverless deploy
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
