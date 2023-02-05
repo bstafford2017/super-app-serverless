@@ -4,7 +4,7 @@ import {
   APIGatewayProxyResult
 } from 'aws-lambda'
 import { insertUser, lookupUser } from '../dynamo'
-import jwt from 'jsonwebtoken'
+import { sign } from 'jsonwebtoken'
 import { User } from '../types'
 import { log, setupLog } from '../logging'
 
@@ -47,7 +47,7 @@ export const login = async (
   return {
     statusCode: 200,
     body: JSON.stringify({
-      token: jwt.sign(
+      token: sign(
         {
           id
         },
@@ -121,7 +121,7 @@ export const register = async (
   return {
     statusCode: 200,
     body: JSON.stringify({
-      token: jwt.sign(
+      token: sign(
         {
           id
         },
