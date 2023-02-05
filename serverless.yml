@@ -20,13 +20,13 @@ package:
   excludeDevDependencies: false
 
 functions:
-  getFeedback:
+  login:
     hander: lamdbas/user.login
     events:
       - httpApi:
         method: POST
         path: super-app/login
-  addFeedback:
+  register:
     hander: lamdbas/user.register
     events:
       - httpApi:
