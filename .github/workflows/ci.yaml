@@ -19,7 +19,7 @@ jobs:
         run: npm install
 
       - name: Run test
-        run: npx serverless test
+        run: npx serverless-bundle test
 
       - name: Serverless package
         run: npx serverless package
