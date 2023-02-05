@@ -43,6 +43,10 @@ export const insertUser = async (
   const datetime = new Date().toISOString()
   const params = {
     TableName: TABLE_NAME,
+    Key: {
+      id,
+      userId
+    },
     Item: {
       id,
       userId: userId,
