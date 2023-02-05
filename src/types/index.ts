@@ -3,5 +3,5 @@ export interface User {
   userId: string
   password: string
   datetime: string
-  email: String
+  email: string
 }

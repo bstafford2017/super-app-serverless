@@ -9,15 +9,15 @@ provider:
   logRetentionInDays: 14
   lambdaHashingVersion: 20201221
 
-plugins:
-  - serverless-bundle
-
 package:
   patterns:
     - '!node_modules'
     - '!.git/**'
   individually: true
   excludeDevDependencies: false
+
+plugins:
+  - serverless-bundle
 
 functions:
   login:

@@ -23,7 +23,10 @@ jobs:
         run: npm install
 
       - name: Run test
-        run: npm test
+        run: npx serverless test
+
+      - name: Serverless package
+        run: npx serverless package
 
   deploy:
     runs-on: ubuntu-latest
