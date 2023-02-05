@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx serverless-bundle test --passWithNoTests"
+    "start": "npx serverless-bundle start",
+    "test": "npx serverless-bundle test --passWithNoTests",
+    "package": "npx serverless package"
   },
   "author": "Benjamin Stafford",
   "license": "ISC",
