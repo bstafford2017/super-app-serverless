@@ -21,17 +21,13 @@ package:
 
 functions:
   login:
-    hander: lamdbas/user.login
+    handler: src/lambdas/user.login
     events:
-      - httpApi:
-        method: POST
-        path: super-app/login
+      - httpApi: 'POST /super-app/login'
   register:
-    hander: lamdbas/user.register
+    handler: src/lambdas/user.register
     events:
-      - httpApi:
-        method: POST
-        path: super-app/register
+      - httpApi: 'POST /super-app/register'
 
 resources:
   - ${file(serverless-resources/dynamo.yml)}

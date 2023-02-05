@@ -1,18 +1,19 @@
-Resource:
-  Type: AWS::DynamoDB::Table
-  Properties:
-    AttributeDefinitions:
-      - AttributeName: id
-        AttributeType: S
-      - AttributeName: userId
-        AttributeType: S
-      - AttributeName: password
-        AttributeType: S
-      - AttributeName: datetime
-        AttributeType: S
-      - AttributeName: email
-        AttributeType: S
-    KeySchema:
-      - AttributeName: id
-        KeyType: HASH
-    BillingMode: PAY_PER_REQUEST
+Resources:
+  userTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: password
+          AttributeType: S
+        - AttributeName: datetime
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST

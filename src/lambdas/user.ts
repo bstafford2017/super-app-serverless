@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken'
 import { User } from '../types'
 import { log, setupLog } from '../logging'
 
-interface LoginRequest {
+export interface LoginRequest {
   userId: string
   password: string
 }
