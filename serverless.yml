@@ -1,0 +1,37 @@
+service: super-app-serverless
+
+provider:
+  name: aws
+  stage: dev
+  region: us-east-1
+  stackName: super-app-serverless-stack
+  runtime: nodejs14.x
+  logRetentionInDays: 14
+  lambdaHashingVersion: 20201221
+
+plugins:
+  - serverless-bundle
+
+package:
+  patterns:
+    - '!node_modules'
+    - '!.git/**'
+  individually: true
+  excludeDevDependencies: false
+
+functions:
+  getFeedback:
+    hander: lamdbas/user.login
+    events:
+      - httpApi:
+        method: POST
+        path: super-app/login
+  addFeedback:
+    hander: lamdbas/user.register
+    events:
+      - httpApi:
+        method: POST
+        path: super-app/register
+
+resources:
+  - ${file(serverless-resources/dynamo.yml)}
