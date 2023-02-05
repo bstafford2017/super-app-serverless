@@ -16,4 +16,12 @@ Resources:
       KeySchema:
         - AttributeName: id
           KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
+        - AttributeName: password
+          KeyType: RANGE
+        - AttributeName: datetime
+          KeyType: RANGE
+        - AttributeName: email
+          KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
