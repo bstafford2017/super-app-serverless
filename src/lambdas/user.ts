@@ -27,6 +27,9 @@ export const login = async (
     log('Invalid input')
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ message: 'Invalid input' })
     }
   }
@@ -37,6 +40,9 @@ export const login = async (
     log('Invalid credentials')
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ message: 'Invalid credentials' })
     }
   }
@@ -46,6 +52,9 @@ export const login = async (
   log(`Authorized request to /login id=${id}, userId=${userId}`)
   return {
     statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify({
       token: sign(
         {
@@ -83,6 +92,9 @@ export const register = async (
     log('Invalid input')
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ message: 'Invalid input' })
     }
   }
@@ -91,6 +103,9 @@ export const register = async (
     log('Invalid input')
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ message: 'Invalid input' })
     }
   }
@@ -101,6 +116,9 @@ export const register = async (
     log('User already exists')
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ message: 'User already exists' })
     }
   }
@@ -111,6 +129,9 @@ export const register = async (
     log(`Failed to insert user for userId=${userId}`)
     return {
       statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ message: `Failed to register userId=${userId}` })
     }
   }
@@ -120,6 +141,9 @@ export const register = async (
   log(`Sucessfully /register for id=${id} userId=${userId}`)
   return {
     statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify({
       token: sign(
         {

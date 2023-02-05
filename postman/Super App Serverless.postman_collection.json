@@ -1,0 +1,73 @@
+{
+	"info": {
+		"_postman_id": "38972332-b172-4e3e-95c8-166730577801",
+		"name": "Super App Serverless",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"test\",\n    \"password\": \"test\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://yr8513x7c6.execute-api.us-east-2.amazonaws.com/super-app/login",
+					"protocol": "https",
+					"host": [
+						"yr8513x7c6",
+						"execute-api",
+						"us-east-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"super-app",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"test\",\n    \"password\": \"test\",\n    \"confirmPassword\": \"test\",\n    \"email\": \"test@test.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://yr8513x7c6.execute-api.us-east-2.amazonaws.com/super-app/register",
+					"protocol": "https",
+					"host": [
+						"yr8513x7c6",
+						"execute-api",
+						"us-east-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"super-app",
+						"register"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
