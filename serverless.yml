@@ -3,8 +3,8 @@ service: super-app-serverless
 provider:
   name: aws
   stage: dev
-  region: us-east-1
-  stackName: super-app-serverless-stack
+  region: us-east-2
+  stackName: super-app-serverless-${sls:stage}
   runtime: nodejs14.x
   logRetentionInDays: 14
   lambdaHashingVersion: 20201221

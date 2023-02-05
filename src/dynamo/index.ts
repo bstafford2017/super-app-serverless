@@ -7,7 +7,7 @@ import { log } from '../logging'
 const TABLE_NAME = 'super-app-user-table'
 
 const dynamo = new DynamoDB.DocumentClient({
-  region: 'us-east-1'
+  region: 'us-east-2'
 })
 
 export const lookupUser = async (
