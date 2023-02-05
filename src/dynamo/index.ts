@@ -28,8 +28,12 @@ export const lookupUser = async (
     const { Items = [] } = await dynamo.query(params).promise()
     log(`Found user for userId=${userId}`)
     return Items.find((i) => i) as User
-  } catch (e: unknown) {
-    log(`Error looking up user for userId=${userId}`)
+  } catch (error: unknown) {
+    log(
+      `Error looking up user for userId=${userId} error=${JSON.stringify(
+        error
+      )}`
+    )
   }
 }
 
@@ -59,7 +63,9 @@ export const insertUser = async (
     await dynamo.put(params).promise()
     log(`Inserted user for userId=${userId}`)
     return { id, userId, password, email, datetime }
-  } catch (e: unknown) {
-    log(`Error inserting user for userId=${userId}`)
+  } catch (error: unknown) {
+    log(
+      `Error inserting user for userId=${userId} error=${JSON.stringify(error)}`
+    )
   }
 }
