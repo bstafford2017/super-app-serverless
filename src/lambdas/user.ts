@@ -47,9 +47,12 @@ export const login = async (
   return {
     statusCode: 200,
     body: JSON.stringify({
-      token: jwt.sign({
-        id
-      })
+      token: jwt.sign(
+        {
+          id
+        },
+        'secret-key-is-here'
+      )
     })
   }
 }
@@ -118,9 +121,12 @@ export const register = async (
   return {
     statusCode: 200,
     body: JSON.stringify({
-      token: jwt.sign({
-        id
-      })
+      token: jwt.sign(
+        {
+          id
+        },
+        'secret-key-is-here'
+      )
     })
   }
 }
