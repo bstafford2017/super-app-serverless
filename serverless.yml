@@ -18,6 +18,7 @@ package:
 
 plugins:
   - serverless-bundle
+  - serverless-plugin-bind-deployment-id
 
 functions:
   login:
@@ -31,3 +32,6 @@ functions:
 
 resources:
   - ${file(serverless-resources/dynamo.yml)}
+  - ${file(serverless-resources/api-gateway.yml)}
+  - ${file(serverless-resources/iam.yml)}
+  - ${file(serverless-resources/cloudwatch.yml)}
