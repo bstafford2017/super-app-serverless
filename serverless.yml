@@ -4,10 +4,8 @@ provider:
   name: aws
   stage: dev
   region: us-east-2
-  stackName: super-app-serverless-${sls:stage}
+  stackName: ${self:service}-${sls:stage}-stack
   runtime: nodejs14.x
-  logRetentionInDays: 14
-  lambdaHashingVersion: 20201221
 
 package:
   patterns:
@@ -25,10 +23,12 @@ functions:
     handler: src/lambdas/user.login
     events:
       - httpApi: 'POST /super-app/login'
+    role: LambdaExecutionRole
   register:
     handler: src/lambdas/user.register
     events:
       - httpApi: 'POST /super-app/register'
+    role: LambdaExecutionRole
 
 resources:
   - ${file(serverless-resources/dynamo.yml)}
