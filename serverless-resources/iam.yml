@@ -1,21 +1,20 @@
-Resources:
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Action: 'sts:AssumeRole'
-      RoleName: ${sls:stage}-${self:service}-role
-      Policies:
-        - PolicyName: 'AllowDynamoDB'
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - dynamodb:PutItem
-                  - dynamodb:Query
-                Resource:
-                  Fn::GetAtt: [SuperAppUserTable, Arn]
+LambdaExecutionRole:
+  Type: AWS::IAM::Role
+  Properties:
+    AssumeRolePolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: Allow
+          Action: 'sts:AssumeRole'
+    RoleName: ${sls:stage}-${self:service}-role
+    Policies:
+      - PolicyName: 'AllowDynamoDB'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:Query
+              Resource:
+                Fn::GetAtt: [SuperAppUserTable, Arn]

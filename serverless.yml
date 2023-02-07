@@ -31,7 +31,8 @@ functions:
     role: LambdaExecutionRole
 
 resources:
-  - ${file(serverless-resources/dynamo.yml)}
-  - ${file(serverless-resources/api-gateway.yml)}
-  - ${file(serverless-resources/iam.yml)}
-  - ${file(serverless-resources/cloudwatch.yml)}
+  Resources:
+    - ${file(serverless-resources/dynamo.yml)}
+    - ${file(serverless-resources/api-gateway.yml)}
+    - ${file(serverless-resources/iam.yml)}
+    - ${file(serverless-resources/cloudwatch.yml)}

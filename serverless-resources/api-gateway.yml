@@ -1,23 +1,22 @@
-Resources:
-  SuperAppRestApi:
-    Type: AWS::ApiGateway::RestApi
-    Properties:
-      Name: ${sls:stage}-${self:service}
+SuperAppRestApi:
+  Type: AWS::ApiGateway::RestApi
+  Properties:
+    Name: ${sls:stage}-${self:service}
 
-  SuperAppApiStage:
-    Type: AWS::ApiGateway::Stage
-    Properties:
-      DeploymentId:
-        Ref: __deployment__
-      RestApiId:
-        Ref: SuperAppRestApi
-      StageName: ${sls:stage}
-      AccessLogSetting:
-        DestinationArn:
-          Fn::GetAtt: [SuperAppLogGroup, Arn]
-      MethodSettings:
-        - DataTraceEnabled: true
-          HttpMethod: '*'
-          LoggingLevel: INFO
-          ResourcePath: '/*'
-          MetricsEnabled: true
+SuperAppApiStage:
+  Type: AWS::ApiGateway::Stage
+  Properties:
+    DeploymentId:
+      Ref: __deployment__
+    RestApiId:
+      Ref: SuperAppRestApi
+    StageName: ${sls:stage}
+    AccessLogSetting:
+      DestinationArn:
+        Fn::GetAtt: [SuperAppLogGroup, Arn]
+    MethodSettings:
+      - DataTraceEnabled: true
+        HttpMethod: '*'
+        LoggingLevel: INFO
+        ResourcePath: '/*'
+        MetricsEnabled: true

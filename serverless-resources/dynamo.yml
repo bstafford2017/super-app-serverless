@@ -1,15 +1,14 @@
-Resources:
-  SuperAppUserTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: userId
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-        - AttributeName: userId
-          KeyType: RANGE
-      BillingMode: PAY_PER_REQUEST
+SuperAppUserTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      - AttributeName: userId
+        AttributeType: S
+    KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      - AttributeName: userId
+        KeyType: RANGE
+    BillingMode: PAY_PER_REQUEST
