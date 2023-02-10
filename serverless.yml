@@ -5,7 +5,7 @@ provider:
   stage: dev
   region: us-east-2
   stackName: ${self:service}-${sls:stage}-stack
-  runtime: nodejs14.x
+  runtime: nodejs16.x
 
 package:
   patterns:
@@ -31,8 +31,7 @@ functions:
     role: LambdaExecutionRole
 
 resources:
-  Resources:
-    - ${file(serverless-resources/dynamo.yml)}
-    - ${file(serverless-resources/api-gateway.yml)}
-    - ${file(serverless-resources/iam.yml)}
-    - ${file(serverless-resources/cloudwatch.yml)}
+  - ${file(serverless-resources/api-gateway.yml)}
+  - ${file(serverless-resources/cloudwatch.yml)}
+  - ${file(serverless-resources/dynamo.yml)}
+  - ${file(serverless-resources/iam.yml)}

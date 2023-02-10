@@ -1,4 +1,5 @@
-SuperAppLogGroup:
-  Type: AWS::Logs::LogGroup
-  Properties:
-    LogGroupName: ${sls:stage}-${self:service}-logs
+Resource:
+  SuperAppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: ${sls:stage}-${self:service}-logs
