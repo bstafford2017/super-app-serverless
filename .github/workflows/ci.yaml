@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Serverless install
-        run: npx serverless plugin install -n serverless-bundle
+        run: npx serverless plugin install -n serverless-bundle serverless-plugin-bind-deployment-id
 
       - name: Serverless deploy
         uses: serverless/github-action@master

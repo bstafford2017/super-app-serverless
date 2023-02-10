@@ -1,5 +1,5 @@
-Resources:
-  userTable:
+Resource:
+  SuperAppUserTable:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:

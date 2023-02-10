@@ -4,10 +4,8 @@ provider:
   name: aws
   stage: dev
   region: us-east-2
-  stackName: super-app-serverless-${sls:stage}
-  runtime: nodejs14.x
-  logRetentionInDays: 14
-  lambdaHashingVersion: 20201221
+  stackName: ${self:service}-${sls:stage}-stack
+  runtime: nodejs16.x
 
 package:
   patterns:
@@ -18,16 +16,22 @@ package:
 
 plugins:
   - serverless-bundle
+  - serverless-plugin-bind-deployment-id
 
 functions:
   login:
     handler: src/lambdas/user.login
     events:
       - httpApi: 'POST /super-app/login'
+    role: LambdaExecutionRole
   register:
     handler: src/lambdas/user.register
     events:
       - httpApi: 'POST /super-app/register'
+    role: LambdaExecutionRole
 
 resources:
+  - ${file(serverless-resources/api-gateway.yml)}
+  - ${file(serverless-resources/cloudwatch.yml)}
   - ${file(serverless-resources/dynamo.yml)}
+  - ${file(serverless-resources/iam.yml)}
