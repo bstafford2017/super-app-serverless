@@ -178,7 +178,8 @@ Resources:
   FactMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      AuthorizationType: NONE
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiGatewayCognitoAuthorizer
       HttpMethod: GET
       ResourceId: !Ref FactResource
       RestApiId: !Ref ApiGatewayRestApi
@@ -189,6 +190,8 @@ Resources:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFactLambda.Arn}/invocations
       MethodResponses:
         - StatusCode: 200
+      AuthorizationScopes:
+        - openid
 
   LoginMethod:
     Type: AWS::ApiGateway::Method
