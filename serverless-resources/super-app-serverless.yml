@@ -108,7 +108,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: cognito-authorizer-lambda
-      Handler: src/lambdas/cognito_authorizer.lambda_handler
+      Handler: src/handlers/cognito_authorizer.lambda_handler
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.9
       Timeout: 10
