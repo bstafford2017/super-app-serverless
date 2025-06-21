@@ -1,0 +1,246 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Super App - All AWS Resources
+
+Resources:
+  # S3 Bucket
+  LambdaDeploymentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: super-app-serverless-bucket
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # IAM Role for Lambda
+  LambdaCognitoBedrockAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: super-app-lambda-cognito-bedrock-access
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CognitoAndBedrockAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:AdminInitiateAuth
+                  - cognito-idp:AdminRespondToAuthChallenge
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource: '*'
+
+  # Cognito User Pool
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: super-app-user-pool
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: super-app-client
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ADMIN_NO_SRP_AUTH
+        - USER_PASSWORD_AUTH
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      AllowedOAuthFlowsUserPoolClient: true
+      CallbackURLs:
+        - https://your-app-domain.com/callback
+      LogoutURLs:
+        - https://your-app-domain.com/logout
+
+  CognitoUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: super-app-user-domain
+      UserPoolId: !Ref CognitoUserPool
+
+  # Lambda Functions
+  GetFactLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: get-fact-lambda
+      Handler: src/handlers/fact.getFact
+      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
+      Runtime: python3.9
+      Timeout: 5
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaDeploymentBucket
+        S3Key: getfact-lambda.zip
+
+  LoginLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: login-lambda
+      Handler: src/handlers/user.login
+      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
+      Runtime: python3.9
+      Timeout: 5
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaDeploymentBucket
+        S3Key: login-lambda.zip
+
+  # API Gateway
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: super-app-api
+
+  ApiGatewayResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: super-app
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiGatewayCognitoAuthorizer
+      HttpMethod: ANY
+      ResourceId: !Ref ApiGatewayResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CognitoAuthorizerLambda.Arn}/invocations
+      MethodResponses:
+        - StatusCode: 200
+        - StatusCode: 401
+      RequestParameters:
+        method.request.header.Origin: false
+      AuthorizationScopes:
+        - openid
+
+  ApiGatewayCognitoAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: CognitoAuthorizer
+      Type: COGNITO_USER_POOLS
+      RestApiId: !Ref ApiGatewayRestApi
+      IdentitySource: method.request.header.Authorization
+      ProviderARNs:
+        - !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ApiGatewayMethod
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      StageName: prod
+
+  ApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: prod
+      RestApiId: !Ref ApiGatewayRestApi
+      DeploymentId: !Ref ApiGatewayDeployment
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          ThrottlingBurstLimit: 10
+          ThrottlingRateLimit: 5
+          MetricsEnabled: true
+          DataTraceEnabled: true
+      Variables: {}
+      TracingEnabled: true
+      Description: 'Prod stage with rate limiting and CORS'
+
+  ApiGatewayOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: OPTIONS
+      ResourceId: !Ref ApiGatewayResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  CognitoAuthorizerLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: cognito-authorizer-lambda
+      Handler: src/lambdas/cognito_authorizer.lambda_handler
+      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
+      Runtime: python3.9
+      Timeout: 10
+      Code:
+        S3Bucket: !Ref LambdaDeploymentBucket
+        S3Key: getfact-lambda.zip
+
+Outputs:
+  LambdaDeploymentBucketName:
+    Description: Name of the S3 bucket for Lambda deployments
+    Value: !Ref LambdaDeploymentBucket
+  LambdaDeploymentBucketArn:
+    Description: ARN of the S3 bucket for Lambda deployments
+    Value: !GetAtt LambdaDeploymentBucket.Arn
+  LambdaCognitoBedrockAccessRoleArn:
+    Description: IAM Role ARN for Lambda Cognito and Bedrock Access
+    Value: !GetAtt LambdaCognitoBedrockAccessRole.Arn
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref CognitoUserPool
+  UserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref CognitoUserPoolClient
+  UserPoolDomain:
+    Description: Cognito User Pool Domain
+    Value: !Ref CognitoUserPoolDomain
+  ApiGatewayRestApiId:
+    Description: API Gateway RestApi ID
+    Value: !Ref ApiGatewayRestApi
+  ApiGatewayUrl:
+    Description: Invoke URL
+    Value: !Sub 'https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/'
