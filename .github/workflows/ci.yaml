@@ -75,13 +75,31 @@ jobs:
       - name: Upload login Lambda to S3
         run: aws s3 cp login-lambda.zip s3://${{ env.S3_BUCKET }}/login-lambda.zip
 
+      - name: Deploy IAM resources
+        run: |
+          aws cloudformation deploy \
+            --template-file serverless-resources/iam.yml \
+            --stack-name super-app-iam \
+            --region ${{ env.AWS_REGION }} \
+            --no-fail-on-empty-changeset
+
+      - name: Get Lambda IAM Role ARN
+        id: get_role_arn
+        run: |
+          ROLE_ARN=$(aws cloudformation describe-stacks \
+            --stack-name super-app-iam \
+            --region ${{ env.AWS_REGION }} \
+            --query "Stacks[0].Outputs[?OutputKey=='LambdaCognitoBedrockAccessRoleArn'].OutputValue" \
+            --output text)
+          echo "ROLE_ARN=$ROLE_ARN" >> $GITHUB_ENV
+
       - name: Deploy getFact Lambda
         run: |
           aws cloudformation deploy \
             --template-file serverless-resources/getfact-lambda.yml \
             --stack-name getfact-lambda \
             --region ${{ env.AWS_REGION }} \
-            --parameter-overrides LambdaDeploymentBucketName=${{ env.S3_BUCKET }} LambdaCodeKey=getfact-lambda.zip \
+            --parameter-overrides LambdaDeploymentBucketName=${{ env.S3_BUCKET }} LambdaCodeKey=getfact-lambda.zip LambdaCognitoBedrockAccessRoleArn=${{ env.ROLE_ARN }} \
             --no-fail-on-empty-changeset
 
       - name: Deploy login Lambda
@@ -90,15 +108,7 @@ jobs:
             --template-file serverless-resources/login-lambda.yml \
             --stack-name login-lambda \
             --region ${{ env.AWS_REGION }} \
-            --parameter-overrides LambdaDeploymentBucketName=${{ env.S3_BUCKET }} LambdaCodeKey=login-lambda.zip \
-            --no-fail-on-empty-changeset
-
-      - name: Deploy IAM resources
-        run: |
-          aws cloudformation deploy \
-            --template-file serverless-resources/iam.yml \
-            --stack-name super-app-iam \
-            --region ${{ env.AWS_REGION }} \
+            --parameter-overrides LambdaDeploymentBucketName=${{ env.S3_BUCKET }} LambdaCodeKey=login-lambda.zip LambdaCognitoBedrockAccessRoleArn=${{ env.ROLE_ARN }} \
             --no-fail-on-empty-changeset
 
       - name: Deploy Cognito resources
@@ -115,5 +125,5 @@ jobs:
             --template-file serverless-resources/apigateway.yml \
             --stack-name super-app-apigateway \
             --region ${{ env.AWS_REGION }} \
-            --parameter-overrides LambdaDeploymentBucketName=${{ env.S3_BUCKET }} LambdaCodeKey=getfact-lambda.zip \
+            --parameter-overrides LambdaDeploymentBucketName=${{ env.S3_BUCKET }} LambdaCodeKey=getfact-lambda.zip LambdaCognitoBedrockAccessRoleArn=${{ env.ROLE_ARN }} \
             --no-fail-on-empty-changeset
