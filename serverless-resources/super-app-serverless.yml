@@ -82,7 +82,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: get-fact-lambda
-      Handler: fact.getFact
+      Handler: src/handlers/fact.getFact
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.9
       Timeout: 5
@@ -95,7 +95,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: login-lambda
-      Handler: user.login
+      Handler: src/handlers/user.login
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.9
       Timeout: 5
@@ -108,7 +108,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: cognito-authorizer-lambda
-      Handler: cognito_authorizer.lambda_handler
+      Handler: src/handlers/cognito_authorizer.lambda_handler
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.9
       Timeout: 10
