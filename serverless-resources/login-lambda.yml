@@ -18,7 +18,7 @@ Resources:
     Properties:
       FunctionName: login-lambda
       Handler: src/handlers/user.login
-      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
+      Role: !Ref LambdaCognitoBedrockAccessRoleArn
       Runtime: python3.9
       Timeout: 5
       MemorySize: 128
