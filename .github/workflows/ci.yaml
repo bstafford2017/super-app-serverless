@@ -65,15 +65,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Upload getFact Lambda to S3
-        run: aws s3 cp getfact-lambda.zip s3://${{ env.S3_BUCKET }}/getfact-lambda.zip
-
-      - name: Upload login Lambda to S3
-        run: aws s3 cp login-lambda.zip s3://${{ env.S3_BUCKET }}/login-lambda.zip
-
-      - name: Upload cognito authorizer Lambda to S3
-        run: aws s3 cp cognito-authorizer-lambda.zip s3://${{ env.S3_BUCKET }}/cognito-authorizer-lambda.zip
-
       - name: Deploy AWS resources
         run: |
           aws cloudformation deploy \
@@ -82,3 +73,12 @@ jobs:
             --region ${{ env.AWS_REGION }} \
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset
+
+      - name: Upload getFact Lambda to S3
+        run: aws s3 cp getfact-lambda.zip s3://${{ env.S3_BUCKET }}/getfact-lambda.zip
+
+      - name: Upload login Lambda to S3
+        run: aws s3 cp login-lambda.zip s3://${{ env.S3_BUCKET }}/login-lambda.zip
+
+      - name: Upload cognito authorizer Lambda to S3
+        run: aws s3 cp cognito-authorizer-lambda.zip s3://${{ env.S3_BUCKET }}/cognito-authorizer-lambda.zip
