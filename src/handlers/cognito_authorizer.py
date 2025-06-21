@@ -1,6 +1,6 @@
 # Handler for Cognito authorizer
 import json
-from cognito_client import verify_jwt_token
+from src.clients.cognito_client import verify_jwt_token
 
 def lambda_handler(event, context):
     token = event.get('authorizationToken')

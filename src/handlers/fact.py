@@ -1,7 +1,7 @@
 # Handler for fact endpoint
 import json
-from logging import setup_log, log
-from bedrock_client import query_bedrock
+from src.utils.logging import setup_log, log
+from src.clients.bedrock_client import query_bedrock
 
 def getFact(event, context):
     setup_log(event, context)
