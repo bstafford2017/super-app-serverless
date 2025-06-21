@@ -1,6 +1,6 @@
 # Handler for user endpoint
 import json
-from src.utils.logging import log, setup_log
+from common.utils.logging import log, setup_log
 
 def login(event, context):
     setup_log(event, context)
