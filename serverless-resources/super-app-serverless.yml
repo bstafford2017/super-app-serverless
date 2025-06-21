@@ -166,12 +166,12 @@ Resources:
       - ApiGatewayMethod
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
-      StageName: prod
+      StageName: deployent-prod
 
   ApiGatewayStage:
     Type: AWS::ApiGateway::Stage
     Properties:
-      StageName: prod
+      StageName: stage-prod
       RestApiId: !Ref ApiGatewayRestApi
       DeploymentId: !Ref ApiGatewayDeployment
       MethodSettings:
