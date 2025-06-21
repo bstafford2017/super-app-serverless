@@ -154,7 +154,7 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       IdentitySource: method.request.header.Authorization
       ProviderARNs:
-        - !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}
+        - !GetAtt CognitoUserPool.Arn
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
