@@ -160,31 +160,33 @@ Resources:
       ProviderARNs:
         - !GetAtt CognitoUserPool.Arn
 
-  # API Gateway resources for /fact and /login endpoints
-  FactResource:
+  # API Gateway resources for /super-app/fact and /super-app/login endpoints
+  SuperAppResource:
     Type: AWS::ApiGateway::Resource
     Properties:
       ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: super-app
+      RestApiId: !Ref ApiGatewayRestApi
+
+  FactResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref SuperAppResource
       PathPart: fact
       RestApiId: !Ref ApiGatewayRestApi
 
-  # Lambda Authorizer for /fact
-  FactLambdaAuthorizer:
-    Type: AWS::ApiGateway::Authorizer
+  LoginResource:
+    Type: AWS::ApiGateway::Resource
     Properties:
-      Name: FactLambdaAuthorizer
-      Type: TOKEN
-      AuthorizerUri:
-        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CognitoAuthorizerLambda.Arn}/invocations
-      IdentitySource: method.request.header.Authorization
+      ParentId: !Ref SuperAppResource
+      PathPart: login
       RestApiId: !Ref ApiGatewayRestApi
-      AuthorizerResultTtlInSeconds: 300
 
+  # FactMethod without authorization
   FactMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      AuthorizationType: CUSTOM
-      AuthorizerId: !Ref FactLambdaAuthorizer
+      AuthorizationType: NONE
       HttpMethod: GET
       ResourceId: !Ref FactResource
       RestApiId: !Ref ApiGatewayRestApi
@@ -195,13 +197,6 @@ Resources:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFactLambda.Arn}/invocations
       MethodResponses:
         - StatusCode: 200
-
-  LoginResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
-      PathPart: login
-      RestApiId: !Ref ApiGatewayRestApi
 
   LoginMethod:
     Type: AWS::ApiGateway::Method
@@ -225,7 +220,7 @@ Resources:
       FunctionName: !GetAtt GetFactLambda.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/GET/fact
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/GET/super-app/fact
 
   LoginLambdaInvokePermission:
     Type: AWS::Lambda::Permission
@@ -233,7 +228,7 @@ Resources:
       FunctionName: !GetAtt LoginLambda.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/login
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/super-app/login
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
