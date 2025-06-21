@@ -65,7 +65,7 @@ jobs:
       - name: Zip functions
         run: |
           zip -j getfact-lambda.zip src/handlers/fact.py src/clients/bedrock_client.py src/utils/logging.py
-          zip -j login-lambda.zip src/handlers/user.py src/clients/cognito_client.py src/utils/logging.py src/models/user.py
+          zip -j login-lambda.zip src/handlers/user.py src/clients/cognito_client.py src/utils/logging.py
           zip -j cognito-authorizer-lambda.zip src/lambdas/cognito_authorizer.py src/utils/logging.py
 
       - name: Upload to S3
