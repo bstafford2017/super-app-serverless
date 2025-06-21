@@ -124,18 +124,6 @@ Resources:
         S3Bucket: !Ref LambdaDeploymentBucket
         S3Key: cognito-authorizer-lambda.zip
 
-  LambdaAuthorizerFunction:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: lambda-authorizer-function
-      Handler: src/lambdas/cognito_authorizer.lambda_handler
-      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
-      Runtime: python3.9
-      Timeout: 10
-      Code:
-        S3Bucket: !Ref LambdaDeploymentBucket
-        S3Key: cognito-authorizer-lambda.zip
-
   # API Gateway
   ApiGatewayRestApi:
     Type: AWS::ApiGateway::RestApi
