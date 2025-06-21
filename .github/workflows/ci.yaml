@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AWS_REGION: us-east-1
-      S3_BUCKET: ${{ secrets.LAMBDA_DEPLOYMENT_BUCKET }}
+      S3_BUCKET: super-app-serverless-bucket
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2

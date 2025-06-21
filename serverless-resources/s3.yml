@@ -5,7 +5,7 @@ Resources:
   LambdaDeploymentBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: super-app-lambda-deployments-${AWS::AccountId}-${AWS::Region}
+      BucketName: super-app-serverless-bucket
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:
