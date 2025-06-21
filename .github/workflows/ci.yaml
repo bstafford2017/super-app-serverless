@@ -54,6 +54,10 @@ jobs:
         run: |
           zip -j login-lambda.zip src/handlers/user.py src/clients/cognito_client.py src/utils/logging.py src/models/user.py
 
+      - name: Zip cognito authorizer Lambda
+        run: |
+          zip -j cognito-authorizer-lambda.zip src/lambdas/cognito_authorizer.py src/utils/logging.py
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -75,3 +79,6 @@ jobs:
 
       - name: Upload login Lambda to S3
         run: aws s3 cp login-lambda.zip s3://${{ env.S3_BUCKET }}/login-lambda.zip
+
+      - name: Upload cognito authorizer Lambda to S3
+        run: aws s3 cp cognito-authorizer-lambda.zip s3://${{ env.S3_BUCKET }}/cognito-authorizer-lambda.zip
