@@ -1,20 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Super App - All AWS Resources
 
-Resources:
-  # S3 Bucket
+Parameters:
   LambdaDeploymentBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: super-app-serverless-bucket
-      VersioningConfiguration:
-        Status: Enabled
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+    Type: String
+    Description: Name of the S3 bucket for Lambda deployment packages
 
+Resources:
   # IAM Role for Lambda
   LambdaCognitoBedrockAccessRole:
     Type: AWS::IAM::Role
@@ -220,12 +212,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: true
 
 Outputs:
-  LambdaDeploymentBucketName:
-    Description: Name of the S3 bucket for Lambda deployments
-    Value: !Ref LambdaDeploymentBucket
-  LambdaDeploymentBucketArn:
-    Description: ARN of the S3 bucket for Lambda deployments
-    Value: !GetAtt LambdaDeploymentBucket.Arn
   LambdaCognitoBedrockAccessRoleArn:
     Description: IAM Role ARN for Lambda Cognito and Bedrock Access
     Value: !GetAtt LambdaCognitoBedrockAccessRole.Arn

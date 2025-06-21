@@ -46,18 +46,6 @@ jobs:
         run: |
           pip install boto3
 
-      - name: Zip getFact Lambda
-        run: |
-          zip -j getfact-lambda.zip src/handlers/fact.py src/clients/bedrock_client.py src/utils/logging.py
-
-      - name: Zip login Lambda
-        run: |
-          zip -j login-lambda.zip src/handlers/user.py src/clients/cognito_client.py src/utils/logging.py src/models/user.py
-
-      - name: Zip cognito authorizer Lambda
-        run: |
-          zip -j cognito-authorizer-lambda.zip src/lambdas/cognito_authorizer.py src/utils/logging.py
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -65,20 +53,33 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy AWS resources
+      - name: Create Lambda S3 bucket
+        run: |
+          aws cloudformation deploy \
+            --template-file serverless-resources/lambda-bucket.yml \
+            --stack-name super-app-lambda-bucket-stack \
+            --region ${{ env.AWS_REGION }} \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
+
+      - name: Zip functions
+        run: |
+          zip -j getfact-lambda.zip src/handlers/fact.py src/clients/bedrock_client.py src/utils/logging.py
+          zip -j login-lambda.zip src/handlers/user.py src/clients/cognito_client.py src/utils/logging.py src/models/user.py
+          zip -j cognito-authorizer-lambda.zip src/lambdas/cognito_authorizer.py src/utils/logging.py
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp getfact-lambda.zip s3://${{ env.S3_BUCKET }}/getfact-lambda.zip
+          aws s3 cp login-lambda.zip s3://${{ env.S3_BUCKET }}/login-lambda.zip
+          aws s3 cp cognito-authorizer-lambda.zip s3://${{ env.S3_BUCKET }}/cognito-authorizer-lambda.zip
+
+      - name: Deploy other AWS resources
         run: |
           aws cloudformation deploy \
             --template-file serverless-resources/super-app-serverless.yml \
             --stack-name super-app-serverless-stack \
             --region ${{ env.AWS_REGION }} \
             --capabilities CAPABILITY_NAMED_IAM \
-            --no-fail-on-empty-changeset
-
-      - name: Upload getFact Lambda to S3
-        run: aws s3 cp getfact-lambda.zip s3://${{ env.S3_BUCKET }}/getfact-lambda.zip
-
-      - name: Upload login Lambda to S3
-        run: aws s3 cp login-lambda.zip s3://${{ env.S3_BUCKET }}/login-lambda.zip
-
-      - name: Upload cognito authorizer Lambda to S3
-        run: aws s3 cp cognito-authorizer-lambda.zip s3://${{ env.S3_BUCKET }}/cognito-authorizer-lambda.zip
+            --no-fail-on-empty-changeset \
+            --parameter-overrides LambdaDeploymentBucket=super-app-serverless-bucket
