@@ -81,6 +81,7 @@ jobs:
             --template-file serverless-resources/getfact-lambda.yml \
             --stack-name getfact-lambda \
             --region ${{ env.AWS_REGION }} \
+            --parameter-overrides LambdaDeploymentBucket=${{ env.S3_BUCKET }} LambdaS3Key=getfact-lambda.zip \
             --no-fail-on-empty-changeset
 
       - name: Deploy login Lambda
@@ -89,6 +90,7 @@ jobs:
             --template-file serverless-resources/login-lambda.yml \
             --stack-name login-lambda \
             --region ${{ env.AWS_REGION }} \
+            --parameter-overrides LambdaDeploymentBucket=${{ env.S3_BUCKET }} LambdaS3Key=login-lambda.zip \
             --no-fail-on-empty-changeset
 
       - name: Deploy IAM resources
@@ -113,5 +115,5 @@ jobs:
             --template-file serverless-resources/apigateway.yml \
             --stack-name super-app-apigateway \
             --region ${{ env.AWS_REGION }} \
-            --parameter-overrides LambdaS3Key=getfact-lambda.zip \
+            --parameter-overrides LambdaDeploymentBucket=${{ env.S3_BUCKET }} LambdaS3Key=getfact-lambda.zip \
             --no-fail-on-empty-changeset
