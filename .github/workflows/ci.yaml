@@ -81,6 +81,7 @@ jobs:
             --template-file serverless-resources/iam.yml \
             --stack-name super-app-iam \
             --region ${{ env.AWS_REGION }} \
+            --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset
 
       - name: Get Lambda IAM Role ARN
@@ -99,6 +100,7 @@ jobs:
             --template-file serverless-resources/getfact-lambda.yml \
             --stack-name getfact-lambda \
             --region ${{ env.AWS_REGION }} \
+            --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides LambdaDeploymentBucketName=${{ env.S3_BUCKET }} LambdaCodeKey=getfact-lambda.zip LambdaCognitoBedrockAccessRoleArn=${{ env.ROLE_ARN }} \
             --no-fail-on-empty-changeset
 
@@ -108,6 +110,7 @@ jobs:
             --template-file serverless-resources/login-lambda.yml \
             --stack-name login-lambda \
             --region ${{ env.AWS_REGION }} \
+            --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides LambdaDeploymentBucketName=${{ env.S3_BUCKET }} LambdaCodeKey=login-lambda.zip LambdaCognitoBedrockAccessRoleArn=${{ env.ROLE_ARN }} \
             --no-fail-on-empty-changeset
 
@@ -125,5 +128,6 @@ jobs:
             --template-file serverless-resources/apigateway.yml \
             --stack-name super-app-apigateway \
             --region ${{ env.AWS_REGION }} \
+            --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides LambdaDeploymentBucketName=${{ env.S3_BUCKET }} LambdaCodeKey=getfact-lambda.zip LambdaCognitoBedrockAccessRoleArn=${{ env.ROLE_ARN }} \
             --no-fail-on-empty-changeset
