@@ -27,7 +27,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      AWS_REGION: us-east-2
+      AWS_REGION: us-east-1
       S3_BUCKET: ${{ secrets.LAMBDA_DEPLOYMENT_BUCKET }}
     steps:
       - name: Checkout source code
@@ -65,7 +65,7 @@ jobs:
         run: |
           aws cloudformation deploy \
             --template-file serverless-resources/s3.yml \
-            --stack-name lambda-deployment-bucket \
+            --stack-name super-app-serverless \
             --region ${{ env.AWS_REGION }} \
             --no-fail-on-empty-changeset
 
