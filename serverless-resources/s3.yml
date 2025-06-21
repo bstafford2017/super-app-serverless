@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 bucket for storing Lambda deployment packages
+
+Resources:
+  LambdaDeploymentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: super-app-lambda-deployments-${AWS::AccountId}-${AWS::Region}
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+Outputs:
+  LambdaDeploymentBucketName:
+    Description: Name of the S3 bucket for Lambda deployments
+    Value: !Ref LambdaDeploymentBucket
+  LambdaDeploymentBucketArn:
+    Description: ARN of the S3 bucket for Lambda deployments
+    Value: !GetAtt LambdaDeploymentBucket.Arn

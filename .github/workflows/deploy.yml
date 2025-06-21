@@ -1,46 +1,24 @@
-name: CI/CD Pipeline
+name: Deploy Lambda and CloudFormation
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-
-      - name: Install Python dependencies
-        run: |
-          pip install boto3
-
-      - name: Run tests
-        run: |
-          # Add your Python test command here, e.g. pytest
-          echo "No tests defined"
-
   deploy:
     runs-on: ubuntu-latest
     env:
       AWS_REGION: us-east-2
       S3_BUCKET: ${{ secrets.LAMBDA_DEPLOYMENT_BUCKET }}
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-
-      - name: Install AWS CLI
-        run: |
-          pip install awscli
 
       - name: Install dependencies
         run: |
@@ -113,5 +91,4 @@ jobs:
             --template-file serverless-resources/apigateway.yml \
             --stack-name super-app-apigateway \
             --region ${{ env.AWS_REGION }} \
-            --parameter-overrides LambdaS3Key=getfact-lambda.zip \
             --no-fail-on-empty-changeset
