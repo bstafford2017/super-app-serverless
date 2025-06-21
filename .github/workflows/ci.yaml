@@ -64,9 +64,9 @@ jobs:
 
       - name: Zip functions
         run: |
-          zip -j -r getfact-lambda.zip src/handlers/fact.py src/common/*
-          zip -j -r login-lambda.zip src/handlers/user.py src/common/*
-          zip -j -r cognito-authorizer-lambda.zip src/handlers/cognito_authorizer.py src/common/*
+          zip -r getfact-lambda.zip src/handlers/fact.py src/common/*
+          zip -r login-lambda.zip src/handlers/user.py src/common/*
+          zip -r cognito-authorizer-lambda.zip src/handlers/cognito_authorizer.py src/common/*
 
       - name: Upload to S3
         run: |
