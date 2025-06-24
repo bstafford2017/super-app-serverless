@@ -10,12 +10,14 @@ bedrock_client = boto3.client('bedrock-runtime', region_name='us-east-1')
 BEDROCK_MODEL_ID = 'amazon.titan-text-lite-v1'
 
 # Reduce max tokens to further cut costs
-MAX_TOKENS_TO_SAMPLE = 50
+MAX_TOKENS_TO_SAMPLE = 100
 
 def query_bedrock(prompt: str):
     body = json.dumps({
         'inputText': prompt,
-        'maxTokenCount': MAX_TOKENS_TO_SAMPLE
+        'textGenerationConfig': {
+            'maxTokenCount': MAX_TOKENS_TO_SAMPLE
+        }
     })
     response = bedrock_client.invoke_model(
         modelId=BEDROCK_MODEL_ID,
