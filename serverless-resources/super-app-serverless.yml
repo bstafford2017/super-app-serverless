@@ -33,6 +33,17 @@ Resources:
                 Action:
                   - bedrock:InvokeModel
                 Resource: '*'
+              # Only for console implementation
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                  - states:StartSyncExecution
+                Resource: arn:aws:states:us-east-1:749936333804:stateMachine:SuperAppConsoleStepFunction
+              - Effect: Allow
+                Action: states:DescribeExecution
+                Resource:
+                  - arn:aws:states:us-east-1:749936333804:stateMachine:SuperAppConsoleStepFunction
+                  - arn:aws:states:us-east-1:749936333804:execution:SuperAppConsoleStepFunction:*
 
   # Cognito User Pool
   CognitoUserPool:
@@ -78,31 +89,18 @@ Resources:
       UserPoolId: !Ref CognitoUserPool
 
   # Lambda Functions
-  GetFactLambda:
+  AskLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: get-fact-lambda
-      Handler: src/handlers/fact.getFact
+      FunctionName: ask-lambda
+      Handler: src/handlers/ask.ask
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.9
       Timeout: 5
       MemorySize: 128
       Code:
         S3Bucket: !Ref LambdaDeploymentBucket
-        S3Key: getfact-lambda.zip
-
-  LoginLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: login-lambda
-      Handler: src/handlers/user.login
-      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
-      Runtime: python3.9
-      Timeout: 5
-      MemorySize: 128
-      Code:
-        S3Bucket: !Ref LambdaDeploymentBucket
-        S3Key: login-lambda.zip
+        S3Key: ask-lambda.zip
 
   CognitoAuthorizerLambda:
     Type: AWS::Lambda::Function
@@ -160,77 +158,46 @@ Resources:
       ProviderARNs:
         - !GetAtt CognitoUserPool.Arn
 
-  FactResource:
+  AskResource:
     Type: AWS::ApiGateway::Resource
     Properties:
       ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
-      PathPart: fact
+      PathPart: ask
       RestApiId: !Ref ApiGatewayRestApi
 
-  LoginResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
-      PathPart: login
-      RestApiId: !Ref ApiGatewayRestApi
-
-  # FactMethod without authorization
-  FactMethod:
+  # AskMethod without authorization
+  AskMethod:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: COGNITO_USER_POOLS
       AuthorizerId: !Ref ApiGatewayCognitoAuthorizer
-      HttpMethod: GET
-      ResourceId: !Ref FactResource
+      HttpMethod: POST
+      ResourceId: !Ref AskResource
       RestApiId: !Ref ApiGatewayRestApi
       Integration:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFactLambda.Arn}/invocations
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AskLambda.Arn}/invocations
       MethodResponses:
         - StatusCode: 200
       AuthorizationScopes:
         - openid
 
-  LoginMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: POST
-      ResourceId: !Ref LoginResource
-      RestApiId: !Ref ApiGatewayRestApi
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLambda.Arn}/invocations
-      MethodResponses:
-        - StatusCode: 200
-
   # Lambda permissions for API Gateway
-  GetFactLambdaInvokePermission:
+  AskLambdaInvokePermission:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !GetAtt GetFactLambda.Arn
+      FunctionName: !GetAtt AskLambda.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/GET/fact
-
-  LoginLambdaInvokePermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt LoginLambda.Arn
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/login
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/ask
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
       - ApiGatewayMethod
-      - FactMethod
-      - LoginMethod
+      - AskMethod
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       StageName: deployent-prod

@@ -64,17 +64,15 @@ jobs:
 
       - name: Zip functions
         run: |
-          zip -r getfact-lambda.zip src/handlers/fact.py src/common/*
-          zip -r login-lambda.zip src/handlers/user.py src/common/*
-          zip -r cognito-authorizer-lambda.zip src/handlers/cognito_authorizer.py src/common/*
+          zip -r ask-lambda.zip src/handlers/ask.py
+          zip -r cognito-authorizer-lambda.zip src/handlers/cognito_authorizer.py
 
       - name: Upload to S3
         run: |
-          aws s3 cp getfact-lambda.zip s3://${{ env.S3_BUCKET }}/getfact-lambda.zip
-          aws s3 cp login-lambda.zip s3://${{ env.S3_BUCKET }}/login-lambda.zip
+          aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
           aws s3 cp cognito-authorizer-lambda.zip s3://${{ env.S3_BUCKET }}/cognito-authorizer-lambda.zip
 
-      - name: Deploy other AWS resources
+      - name: Deploy Serverless AWS resources
         run: |
           aws cloudformation deploy \
             --template-file serverless-resources/super-app-serverless.yml \
