@@ -2,6 +2,7 @@
 import boto3
 import json
 from datetime import datetime
+import traceback
 
 # Initialize the Bedrock Runtime client
 bedrock_client = boto3.client('bedrock-runtime', region_name='us-east-1')
@@ -54,6 +55,7 @@ def ask(event, context=None):
         }
     except Exception as e:
         print(f'Error: {str(e)}')
+        traceback.print_exc()
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})
