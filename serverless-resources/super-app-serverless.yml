@@ -33,6 +33,12 @@ Resources:
                 Action:
                   - bedrock:InvokeModel
                 Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: 'arn:aws:logs:*:*:*'
               # Only for console implementation
               - Effect: Allow
                 Action:
@@ -101,6 +107,12 @@ Resources:
       Code:
         S3Bucket: !Ref LambdaDeploymentBucket
         S3Key: ask-lambda.zip
+      Environment:
+        Variables: {}
+      TracingConfig:
+        Mode: Active
+      # Ensure logs are sent to CloudWatch
+      # Log group is created above
 
   CognitoAuthorizerLambda:
     Type: AWS::Lambda::Function
@@ -113,6 +125,12 @@ Resources:
       Code:
         S3Bucket: !Ref LambdaDeploymentBucket
         S3Key: cognito-authorizer-lambda.zip
+      Environment:
+        Variables: {}
+      TracingConfig:
+        Mode: Active
+      # Ensure logs are sent to CloudWatch
+      # Log group is created above
 
   # API Gateway
   ApiGatewayRestApi:
@@ -244,6 +262,18 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
+
+  AskLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/ask-lambda
+      RetentionInDays: 14
+
+  CognitoAuthorizerLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/cognito-authorizer-lambda
+      RetentionInDays: 14
 
 Outputs:
   LambdaCognitoBedrockAccessRoleArn:
