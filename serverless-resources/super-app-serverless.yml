@@ -114,24 +114,6 @@ Resources:
       # Ensure logs are sent to CloudWatch
       # Log group is created above
 
-  CognitoAuthorizerLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: cognito-authorizer-lambda
-      Handler: src/handlers/cognito_authorizer.lambda_handler
-      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
-      Runtime: python3.9
-      Timeout: 10
-      Code:
-        S3Bucket: !Ref LambdaDeploymentBucket
-        S3Key: cognito-authorizer-lambda.zip
-      Environment:
-        Variables: {}
-      TracingConfig:
-        Mode: Active
-      # Ensure logs are sent to CloudWatch
-      # Log group is created above
-
   # API Gateway
   ApiGatewayRestApi:
     Type: AWS::ApiGateway::RestApi
@@ -145,6 +127,16 @@ Resources:
       PathPart: super-app
       RestApiId: !Ref ApiGatewayRestApi
 
+  ApiGatewayCognitoAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: CognitoAuthorizer
+      Type: COGNITO_USER_POOLS
+      RestApiId: !Ref ApiGatewayRestApi
+      IdentitySource: method.request.header.Authorization
+      ProviderARNs:
+        - !GetAtt CognitoUserPool.Arn
+
   ApiGatewayMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -157,7 +149,7 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CognitoAuthorizerLambda.Arn}/invocations
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AskLambda.Arn}/invocations
       MethodResponses:
         - StatusCode: 200
         - StatusCode: 401
@@ -165,16 +157,6 @@ Resources:
         method.request.header.Origin: false
       AuthorizationScopes:
         - openid
-
-  ApiGatewayCognitoAuthorizer:
-    Type: AWS::ApiGateway::Authorizer
-    Properties:
-      Name: CognitoAuthorizer
-      Type: COGNITO_USER_POOLS
-      RestApiId: !Ref ApiGatewayRestApi
-      IdentitySource: method.request.header.Authorization
-      ProviderARNs:
-        - !GetAtt CognitoUserPool.Arn
 
   AskResource:
     Type: AWS::ApiGateway::Resource
@@ -267,12 +249,6 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: /aws/lambda/ask-lambda
-      RetentionInDays: 7
-
-  CognitoAuthorizerLambdaLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: /aws/lambda/cognito-authorizer-lambda
       RetentionInDays: 7
 
 Outputs:

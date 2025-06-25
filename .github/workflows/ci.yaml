@@ -40,7 +40,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install awscli boto3 requests python-jose -t .
+          pip install awscli boto3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -61,12 +61,10 @@ jobs:
       - name: Zip functions
         run: |
           zip -r ask-lambda.zip .
-          zip -r cognito-authorizer-lambda.zip .
 
       - name: Upload to S3
         run: |
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
-          aws s3 cp cognito-authorizer-lambda.zip s3://${{ env.S3_BUCKET }}/cognito-authorizer-lambda.zip
 
       - name: Update ask-lambda code
         run: |
@@ -74,14 +72,6 @@ jobs:
             --function-name ask-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
             --s3-key ask-lambda.zip \
-            --region ${{ env.AWS_REGION }}
-
-      - name: Update cognito-authorizer-lambda code
-        run: |
-          aws lambda update-function-code \
-            --function-name cognito-authorizer-lambda \
-            --s3-bucket ${{ env.S3_BUCKET }} \
-            --s3-key cognito-authorizer-lambda.zip \
             --region ${{ env.AWS_REGION }}
 
       - name: Deploy Serverless AWS resources
