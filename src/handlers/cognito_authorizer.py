@@ -3,7 +3,7 @@ import requests
 from jose import jwt
 import json
 
-COGNITO_REGION = 'us-east-2'  # Update as needed
+COGNITO_REGION = 'us-east-1'  # Update as needed
 USER_POOL_ID = 'us-east-1_UsOf5uctI'  # Replace with your Cognito User Pool ID
 CLIENT_ID = 'bf8cdaqjoqh3o5fu7fd3brc20'    # Replace with your Cognito App Client ID
 
