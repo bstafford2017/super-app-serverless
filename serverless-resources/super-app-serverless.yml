@@ -17,7 +17,9 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: lambda.amazonaws.com
+              Service:
+                - lambda.amazonaws.com
+                - apigateway.amazonaws.com
             Action: sts:AssumeRole
       Policies:
         - PolicyName: CognitoAndBedrockAccessPolicy
@@ -215,9 +217,15 @@ Resources:
           ThrottlingRateLimit: 5
           MetricsEnabled: true
           DataTraceEnabled: true
+          LoggingLevel: INFO
       Variables: {}
       TracingEnabled: true
       Description: 'Prod stage with rate limiting and CORS'
+      AccessLogSetting:
+        DestinationArn: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/apigateway/cognito-authorizer
+        Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","caller":"$context.identity.caller","user":"$context.identity.user","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath","status":"$context.status","protocol":"$context.protocol","responseLength":"$context.responseLength"}'
+      # Execution logs will go to /aws/apigateway/super-app-api
+      # This is controlled by MethodSettings above and the log group creation
 
   ApiGatewayOptionsMethod:
     Type: AWS::ApiGateway::Method
@@ -250,6 +258,31 @@ Resources:
     Properties:
       LogGroupName: /aws/lambda/ask-lambda
       RetentionInDays: 7
+
+  ApiGatewayExecutionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/apigateway/super-app-api
+      RetentionInDays: 7
+  ApiGatewayExecutionLogGroupPolicy:
+    Type: AWS::Logs::ResourcePolicy
+    Properties:
+      PolicyName: ApiGatewayExecutionLogPolicy
+      PolicyDocument: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Service": "apigateway.amazonaws.com" },
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/apigateway/super-app-api:*"
+            }
+          ]
+        }
 
 Outputs:
   LambdaCognitoBedrockAccessRoleArn:
