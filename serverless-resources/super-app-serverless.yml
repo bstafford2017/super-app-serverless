@@ -267,13 +267,13 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: /aws/lambda/ask-lambda
-      RetentionInDays: 14
+      RetentionInDays: 7
 
   CognitoAuthorizerLambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: /aws/lambda/cognito-authorizer-lambda
-      RetentionInDays: 14
+      RetentionInDays: 7
 
 Outputs:
   LambdaCognitoBedrockAccessRoleArn:
