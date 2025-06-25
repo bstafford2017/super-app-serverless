@@ -68,6 +68,22 @@ jobs:
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
           aws s3 cp cognito-authorizer-lambda.zip s3://${{ env.S3_BUCKET }}/cognito-authorizer-lambda.zip
 
+      - name: Update ask-lambda code
+        run: |
+          aws lambda update-function-code \
+            --function-name ask-lambda \
+            --s3-bucket ${{ env.S3_BUCKET }} \
+            --s3-key ask-lambda.zip \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Update cognito-authorizer-lambda code
+        run: |
+          aws lambda update-function-code \
+            --function-name cognito-authorizer-lambda \
+            --s3-bucket ${{ env.S3_BUCKET }} \
+            --s3-key cognito-authorizer-lambda.zip \
+            --region ${{ env.AWS_REGION }}
+
       - name: Deploy Serverless AWS resources
         run: |
           aws cloudformation deploy \
