@@ -38,13 +38,13 @@ def ask(event, context=None):
         print(f'Error parsing request body: {e}')
         return {
             'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid request body'})
+            'body': {'error': 'Invalid request body'}
         }
 
     if not user_prompt:
         return {
             'statusCode': 400,
-            'body': json.dumps({'error': 'Prompt is required'})
+            'body': {'error': 'Prompt is required'}
         }
 
     try:
@@ -52,12 +52,12 @@ def ask(event, context=None):
         output = json.loads(response).get("results", [{}])[0].get("outputText", "No results found.")
         return {
             'statusCode': 200,
-            'body': json.dumps({'response': output})
+            'body': {'response': output}
         }
     except Exception as e:
         print(f'Error: {str(e)}')
         traceback.print_exc()
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
+            'body': {'error': 'Internal server error'}
         }
