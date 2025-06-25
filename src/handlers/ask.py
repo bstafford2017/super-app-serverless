@@ -49,9 +49,10 @@ def ask(event, context=None):
 
     try:
         response = query_bedrock(user_prompt)
+        output = json.loads(response).get("results", [{}])[0].get("outputText", "No results found.")
         return {
             'statusCode': 200,
-            'body': json.dumps({'response': response})
+            'body': json.dumps({'response': output})
         }
     except Exception as e:
         print(f'Error: {str(e)}')
