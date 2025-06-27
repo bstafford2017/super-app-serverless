@@ -86,9 +86,11 @@ Resources:
         - profile
       AllowedOAuthFlowsUserPoolClient: true
       CallbackURLs:
-        - https://your-app-domain.com/callback
+        - https://www.the-super-app.com/
+        - https://localhost:8080/
       LogoutURLs:
-        - https://your-app-domain.com/logout
+        - https://www.the-super-app.com/logout
+        - https://localhost:8080/logout
 
   CognitoUserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
