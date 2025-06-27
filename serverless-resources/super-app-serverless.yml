@@ -286,6 +286,15 @@ Resources:
           ]
         }
 
+  CognitoUserPoolIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      ProviderName: Cognito
+      ProviderType: Cognito
+      UserPoolId: !Ref CognitoUserPool
+      ProviderDetails: {}
+      AttributeMapping: {}
+
 Outputs:
   LambdaCognitoBedrockAccessRoleArn:
     Description: IAM Role ARN for Lambda Cognito and Bedrock Access
