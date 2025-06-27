@@ -84,6 +84,9 @@ Resources:
         - email
         - openid
         - profile
+      SupportedIdentityProviders:
+        - COGNITO
+        - MyOIDCProvider
       AllowedOAuthFlowsUserPoolClient: true
       CallbackURLs:
         - https://www.the-super-app.com/
@@ -289,11 +292,18 @@ Resources:
   CognitoUserPoolIdentityProvider:
     Type: AWS::Cognito::UserPoolIdentityProvider
     Properties:
-      ProviderName: Cognito
-      ProviderType: Cognito
+      ProviderName: MyOIDCProvider
+      ProviderType: OIDC
       UserPoolId: !Ref CognitoUserPool
-      ProviderDetails: {}
-      AttributeMapping: {}
+      ProviderDetails:
+        client_id: <YOUR_OIDC_CLIENT_ID>
+        client_secret: <YOUR_OIDC_CLIENT_SECRET>
+        attributes_request_method: GET
+        oidc_issuer: https://<YOUR_OIDC_ISSUER>
+        authorize_scopes: openid profile email
+      AttributeMapping:
+        email: email
+        username: sub
 
 Outputs:
   LambdaCognitoBedrockAccessRoleArn:
