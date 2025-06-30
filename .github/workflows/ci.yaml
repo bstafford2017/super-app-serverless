@@ -68,6 +68,16 @@ jobs:
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
           aws s3 cp recommend-lambda.zip s3://${{ env.S3_BUCKET }}/recommend-lambda.zip
 
+      - name: Deploy Serverless AWS resources
+        run: |
+          aws cloudformation deploy \
+            --template-file serverless-resources/super-app-serverless.yml \
+            --stack-name super-app-serverless-stack \
+            --region ${{ env.AWS_REGION }} \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides LambdaDeploymentBucket=super-app-serverless-bucket
+
       - name: Update Lambda function code
         run: |
           aws lambda update-function-code \
@@ -80,13 +90,3 @@ jobs:
             --s3-bucket ${{ env.S3_BUCKET }} \
             --s3-key recommend-lambda.zip \
             --region ${{ env.AWS_REGION }}
-
-      - name: Deploy Serverless AWS resources
-        run: |
-          aws cloudformation deploy \
-            --template-file serverless-resources/super-app-serverless.yml \
-            --stack-name super-app-serverless-stack \
-            --region ${{ env.AWS_REGION }} \
-            --capabilities CAPABILITY_NAMED_IAM \
-            --no-fail-on-empty-changeset \
-            --parameter-overrides LambdaDeploymentBucket=super-app-serverless-bucket
