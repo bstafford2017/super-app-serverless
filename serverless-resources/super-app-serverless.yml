@@ -120,6 +120,23 @@ Resources:
       # Ensure logs are sent to CloudWatch
       # Log group is created above
 
+  RecommendLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: recommend-lambda
+      Handler: src/handlers/recommend.recommend
+      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
+      Runtime: python3.9
+      Timeout: 5
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaDeploymentBucket
+        S3Key: recommend-lambda.zip
+      Environment:
+        Variables: {}
+      TracingConfig:
+        Mode: Active
+
   # API Gateway
   ApiGatewayRestApi:
     Type: AWS::ApiGateway::RestApi
@@ -171,7 +188,6 @@ Resources:
       PathPart: ask
       RestApiId: !Ref ApiGatewayRestApi
 
-  # AskMethod without authorization
   AskMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -190,6 +206,31 @@ Resources:
       AuthorizationScopes:
         - openid
 
+  RecommendResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: recommend
+      RestApiId: !Ref ApiGatewayRestApi
+
+  RecommendMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiGatewayCognitoAuthorizer
+      HttpMethod: POST
+      ResourceId: !Ref RecommendResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RecommendLambda.Arn}/invocations
+      MethodResponses:
+        - StatusCode: 200
+      AuthorizationScopes:
+        - openid
+
   # Lambda permissions for API Gateway
   AskLambdaInvokePermission:
     Type: AWS::Lambda::Permission
@@ -198,6 +239,14 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/ask
+
+  RecommendLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt RecommendLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/recommend
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
@@ -261,6 +310,12 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: /aws/lambda/ask-lambda
+      RetentionInDays: 7
+
+  RecommendLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/recommend-lambda
       RetentionInDays: 7
 
   ApiGatewayExecutionLogGroup:

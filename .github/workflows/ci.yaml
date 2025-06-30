@@ -60,18 +60,25 @@ jobs:
 
       - name: Zip functions
         run: |
-          zip -r ask-lambda.zip .
+          zip -r ask-lambda.zip src/handlers/ask.py
+          zip -r recommend-lambda.zip src/handlers/recommend.py
 
-      - name: Upload to S3
+      - name: Upload Lambda functions to S3
         run: |
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
+          aws s3 cp recommend-lambda.zip s3://${{ env.S3_BUCKET }}/recommend-lambda.zip
 
-      - name: Update ask-lambda code
+      - name: Update Lambda function code
         run: |
           aws lambda update-function-code \
             --function-name ask-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
             --s3-key ask-lambda.zip \
+            --region ${{ env.AWS_REGION }}
+          aws lambda update-function-code \
+            --function-name recommend-lambda \
+            --s3-bucket ${{ env.S3_BUCKET }} \
+            --s3-key recommend-lambda.zip \
             --region ${{ env.AWS_REGION }}
 
       - name: Deploy Serverless AWS resources
