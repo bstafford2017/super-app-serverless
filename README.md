@@ -2,6 +2,8 @@
 
 Backend architecture for super-app
 
+## [Architecture](./docs/architecture.jpg)
+
 ## Overview 📝
 
 This project is a Python-based, serverless backend for the Super App, deployed on AWS using CloudFormation and Lambda. It includes:
@@ -29,12 +31,10 @@ This project is a Python-based, serverless backend for the Super App, deployed o
 ## Directory Structure 📁
 
 ```
+docs/                   # Documentation
 serverless-resources/   # CloudFormation templates
 src/
-  clients/              # AWS service clients (bedrock, cognito)
   handlers/             # Lambda function handlers
-  models/               # Data models
-  utils/                # Utility modules
 ```
 
 ## Requirements ⚙️
