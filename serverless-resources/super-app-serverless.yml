@@ -386,6 +386,18 @@ Resources:
       LogGroupName: /aws/lambda/recommend-lambda
       RetentionInDays: 7
 
+  TriviaQuestionLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/trivia-question-lambda
+      RetentionInDays: 7
+
+  UpdateUserScoreLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/update-user-score-lambda
+      RetentionInDays: 7
+
   ApiGatewayExecutionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
