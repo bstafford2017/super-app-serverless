@@ -28,7 +28,7 @@ def bedrock_query(prompt, temperature=0.7):
             }
         })
     )
-    return response['body'].read().decode('utf-8')
+    return json.loads(response).get("results", [{}])[0].get("outputText", "No results found.")
 
 
 def generate_trivia(event, context):
