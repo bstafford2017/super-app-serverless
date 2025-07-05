@@ -36,12 +36,22 @@ def generate_trivia(event, context):
     Lambda handler to generate a random trivia question about a topic using Bedrock.
     Expects a JSON body with a 'topic' field (e.g., 'science', 'math', 'history').
     """
-    # Parse topic from event
+
     try:
-        body = json.loads(event.get('body', '{}'))
-        topic = body.get('topic', 'science')
-    except Exception:
-        topic = 'science'
+        body = json.loads(event['body'])
+        topic = body.get("topic")
+    except Exception as e:
+        print(f'Error parsing request body: {e}')
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': 'Invalid request body'})
+        }
+
+    if not topic:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': 'Topic is required'})
+        }
 
     # Use Bedrock to generate a trivia question
     prompt = (
