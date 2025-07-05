@@ -12,7 +12,7 @@ BEDROCK_MODEL_ID = 'amazon.titan-text-lite-v1'
 # Reduce max tokens to further cut costs
 MAX_TOKENS_TO_SAMPLE = 100
 
-def bedrock_query(prompt, temperature=0.7):
+def bedrock_query(prompt):
     response = bedrock_client.invoke_model(
         modelId=BEDROCK_MODEL_ID,
         contentType='application/json',
@@ -24,7 +24,7 @@ def bedrock_query(prompt, temperature=0.7):
             }
         })
     )
-    return json.loads(response).get("results", [{}])[0].get("outputText", "No results found.")
+    return json.loads(response)
 
 
 def generate_trivia(event, context):
