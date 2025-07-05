@@ -13,10 +13,6 @@ BEDROCK_MODEL_ID = 'amazon.titan-text-lite-v1'
 MAX_TOKENS_TO_SAMPLE = 100
 
 def bedrock_query(prompt, temperature=0.7):
-    """
-    Query AWS Bedrock with the given prompt and parameters.
-    Returns the parsed JSON object from the model's response.
-    """
     response = bedrock_client.invoke_model(
         modelId=BEDROCK_MODEL_ID,
         contentType='application/json',
@@ -28,16 +24,10 @@ def bedrock_query(prompt, temperature=0.7):
             }
         })
     )
-    response_body = response['body'].read().decode('utf-8')
-    return json.loads(response_body).get("results", [{}])[0].get("outputText", "No results found.")
+    return json.loads(response).get("results", [{}])[0].get("outputText", "No results found.")
 
 
 def generate_trivia(event, context):
-    """
-    Lambda handler to generate a random trivia question about a topic using Bedrock.
-    Expects a JSON body with a 'topic' field (e.g., 'science', 'math', 'history').
-    """
-
     try:
         body = json.loads(event['body'])
         topic = body.get("topic")

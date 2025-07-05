@@ -8,11 +8,6 @@ table_name = os.environ.get('DYNAMO_TABLE_NAME', 'user-scores')
 table = dynamodb.Table(table_name)
 
 def update_score(event, context):
-    """
-    Lambda handler to update a user's score in DynamoDB.
-    Expects a JSON body with 'cognitoId' and 'score' fields.
-    """
-
     try:
         body = json.loads(event.get('body', '{}'))
         question = body['question']
