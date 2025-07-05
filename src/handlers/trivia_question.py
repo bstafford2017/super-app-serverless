@@ -24,7 +24,7 @@ def bedrock_query(prompt):
             }
         })
     )
-    return json.loads(response)
+    return response['body'].read().decode('utf-8')
 
 
 def generate_trivia(event, context):
@@ -52,7 +52,8 @@ def generate_trivia(event, context):
     )
 
     try:
-        trivia = bedrock_query(prompt)
+        response = bedrock_query(prompt)
+        output = json.loads(response).get("results", [{}])[0].get("outputText", "No results found.")
     except Exception as e:
         return {
             'statusCode': 500,
@@ -62,6 +63,6 @@ def generate_trivia(event, context):
 
     return {
         'statusCode': 200,
-        'body': json.dumps(trivia),
+        'body': json.dumps({'response': output}),
         'headers': {'Content-Type': 'application/json'}
     }
