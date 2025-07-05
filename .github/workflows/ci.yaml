@@ -62,11 +62,15 @@ jobs:
         run: |
           zip -r ask-lambda.zip src/handlers/ask.py
           zip -r recommend-lambda.zip src/handlers/recommend.py
+          zip -r trivia-question-lambda.zip src/handlers/trivia_question.py
+          zip -r update-user-score-lambda.zip src/handlers/update_user_score.py
 
       - name: Upload Lambda functions to S3
         run: |
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
           aws s3 cp recommend-lambda.zip s3://${{ env.S3_BUCKET }}/recommend-lambda.zip
+          aws s3 cp trivia-question-lambda.zip s3://${{ env.S3_BUCKET }}/trivia-question-lambda.zip
+          aws s3 cp update-user-score-lambda.zip s3://${{ env.S3_BUCKET }}/update-user-score-lambda.zip
 
       - name: Deploy Serverless AWS resources
         run: |
@@ -89,4 +93,14 @@ jobs:
             --function-name recommend-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
             --s3-key recommend-lambda.zip \
+            --region ${{ env.AWS_REGION }}
+          aws lambda update-function-code \
+            --function-name trivia-question-lambda \
+            --s3-bucket ${{ env.S3_BUCKET }} \
+            --s3-key trivia-question-lambda.zip \
+            --region ${{ env.AWS_REGION }}
+          aws lambda update-function-code \
+            --function-name update-user-score-lambda \
+            --s3-bucket ${{ env.S3_BUCKET }} \
+            --s3-key update-user-score-lambda.zip \
             --region ${{ env.AWS_REGION }}
