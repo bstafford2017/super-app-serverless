@@ -107,7 +107,7 @@ Resources:
       FunctionName: ask-lambda
       Handler: src/handlers/ask.ask
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
-      Runtime: python3.14
+      Runtime: python3.13
       Timeout: 5
       MemorySize: 128
       Code:
@@ -127,7 +127,7 @@ Resources:
       FunctionName: recommend-lambda
       Handler: src/handlers/recommend.recommend
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
-      Runtime: python3.14
+      Runtime: python3.13
       Timeout: 5
       MemorySize: 128
       Code:
