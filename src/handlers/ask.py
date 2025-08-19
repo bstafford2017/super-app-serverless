@@ -15,11 +15,10 @@ BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', '')
 MAX_TOKENS_TO_SAMPLE = 100
 
 def query_bedrock(prompt: str):
-    # Use the Converse API format for AWS Nova
     body = json.dumps({
         "prompt": prompt,
         "max_tokens_to_sample": MAX_TOKENS_TO_SAMPLE,
-        "temperature": 0.7,
+        "temperature": 0.7
     })
     response = bedrock_client.invoke_model(
         modelId=BEDROCK_MODEL_ID,
