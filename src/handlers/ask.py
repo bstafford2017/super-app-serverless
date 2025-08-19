@@ -15,13 +15,15 @@ BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', '')
 MAX_TOKENS_TO_SAMPLE = 100
 
 def query_bedrock(prompt: str):
-    # Ensure prompt starts with "Human:"
-    if not prompt.strip().startswith("Human:"):
-        prompt = f"Human: {prompt.strip()}"
     body = json.dumps({
-        "prompt": prompt,
-        "max_tokens_to_sample": MAX_TOKENS_TO_SAMPLE,
-        "temperature": 0.7
+        "max_tokens": MAX_TOKENS_TO_SAMPLE,
+        "temperature": 0.7,
+        "messages": [
+            {
+                "role": "user",
+                "content": [{"type": "text", "text": prompt}],
+            }
+        ],
     })
     response = bedrock_client.invoke_model(
         modelId=BEDROCK_MODEL_ID,
@@ -33,7 +35,11 @@ def query_bedrock(prompt: str):
     # Parse the response
     try:
         result = json.loads(response_body)
-        return result.get('completion', 'No results found.')
+        # Try to extract content from the response
+        content = result.get("content", [])
+        if isinstance(content, list) and len(content) > 0 and isinstance(content[0], dict):
+            return content[0].get("text", "No results found.")
+        return "No results found."
     except Exception:
         return response_body
 
