@@ -15,11 +15,13 @@ BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', '')
 MAX_TOKENS_TO_SAMPLE = 100
 
 def query_bedrock(prompt: str):
+    # Use the Converse API format for AWS Nova
     body = json.dumps({
-        'inputText': prompt,
-        'textGenerationConfig': {
-            'maxTokenCount': MAX_TOKENS_TO_SAMPLE
-        }
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": MAX_TOKENS_TO_SAMPLE,
+        "temperature": 0.7
     })
     response = bedrock_client.invoke_model(
         modelId=BEDROCK_MODEL_ID,
@@ -27,7 +29,14 @@ def query_bedrock(prompt: str):
         accept='application/json',
         contentType='application/json'
     )
-    return response['body'].read().decode('utf-8')
+    response_body = response['body'].read().decode('utf-8')
+    # Parse the Converse API response
+    try:
+        result = json.loads(response_body)
+        # Nova returns a 'content' field in the first message of 'choices'
+        return result.get('choices', [{}])[0].get('message', {}).get('content', 'No results found.')
+    except Exception:
+        return response_body
 
 
 def ask(event, context=None):
