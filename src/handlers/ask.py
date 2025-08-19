@@ -64,8 +64,7 @@ def ask(event, context=None):
         }
 
     try:
-        response = query_bedrock(user_prompt)
-        output = json.loads(response).get("results", [{}])[0].get("outputText", "No results found.")
+        output = query_bedrock(user_prompt)
         return {
             'statusCode': 200,
             'body': json.dumps({'response': output})
