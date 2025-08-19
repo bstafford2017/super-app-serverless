@@ -9,7 +9,7 @@ import traceback
 bedrock_client = boto3.client('bedrock-runtime', region_name='us-east-1')
 
 # Use Amazon Nova Micro model
-BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'amazon.nova-micro-v1')
+BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', '')
 
 # Reduce max tokens to further cut costs
 MAX_TOKENS_TO_SAMPLE = 100
