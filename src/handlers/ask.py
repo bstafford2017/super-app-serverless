@@ -16,6 +16,7 @@ MAX_TOKENS_TO_SAMPLE = 100
 
 def query_bedrock(prompt: str):
     body = json.dumps({
+        "anthropic_version": "bedrock-2023-05-31",
         "max_tokens": MAX_TOKENS_TO_SAMPLE,
         "temperature": 0.7,
         "messages": [
