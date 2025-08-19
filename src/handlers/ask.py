@@ -1,14 +1,15 @@
 # Handler for fact endpoint
 import boto3
 import json
+import os
 from datetime import datetime
 import traceback
 
 # Initialize the Bedrock Runtime client
 bedrock_client = boto3.client('bedrock-runtime', region_name='us-east-1')
 
-# Use Amazon Titan Text Lite v1 model
-BEDROCK_MODEL_ID = 'amazon.titan-text-lite-v1'
+# Use Amazon Nova Micro model
+BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'amazon.nova-micro-v1')
 
 # Reduce max tokens to further cut costs
 MAX_TOKENS_TO_SAMPLE = 100
