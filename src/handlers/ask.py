@@ -20,8 +20,10 @@ def query_bedrock(prompt: str):
         "messages": [
             {"role": "user", "content": prompt}
         ],
-        "max_tokens": MAX_TOKENS_TO_SAMPLE,
-        "temperature": 0.7
+        "inference_parameters": {
+            "max_tokens": MAX_TOKENS_TO_SAMPLE,
+            "temperature": 0.7
+        }
     })
     response = bedrock_client.invoke_model(
         modelId=BEDROCK_MODEL_ID,
