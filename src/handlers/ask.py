@@ -15,6 +15,9 @@ BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', '')
 MAX_TOKENS_TO_SAMPLE = 100
 
 def query_bedrock(prompt: str):
+    # Ensure prompt starts with "Human:"
+    if not prompt.strip().startswith("Human:"):
+        prompt = f"Human: {prompt.strip()}"
     body = json.dumps({
         "prompt": prompt,
         "max_tokens_to_sample": MAX_TOKENS_TO_SAMPLE,
