@@ -18,7 +18,7 @@ def query_bedrock(prompt: str):
     # Use the Converse API format for AWS Nova
     body = json.dumps({
         "prompt": prompt,
-        "max_gen_len": MAX_TOKENS_TO_SAMPLE,
+        "max_tokens_to_sample": MAX_TOKENS_TO_SAMPLE,
         "temperature": 0.7,
     })
     response = bedrock_client.invoke_model(
@@ -28,10 +28,10 @@ def query_bedrock(prompt: str):
         contentType='application/json'
     )
     response_body = response['body'].read().decode('utf-8')
-    # Parse the Llama 4 Maverick 17B response
+    # Parse the response
     try:
         result = json.loads(response_body)
-        return result.get('generation', 'No results found.')
+        return result.get('completion', 'No results found.')
     except Exception:
         return response_body
 
