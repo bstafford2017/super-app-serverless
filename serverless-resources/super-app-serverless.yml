@@ -115,7 +115,7 @@ Resources:
         S3Key: ask-lambda.zip
       Environment:
         Variables:
-          BEDROCK_MODEL_ID: amazon.nova-micro-v1
+          BEDROCK_MODEL_ID: amazon.nova-micro-v1:0
       TracingConfig:
         Mode: Active
       # Ensure logs are sent to CloudWatch
@@ -135,7 +135,7 @@ Resources:
         S3Key: recommend-lambda.zip
       Environment:
         Variables:
-          BEDROCK_MODEL_ID: amazon.nova-micro-v1
+          BEDROCK_MODEL_ID: amazon.nova-micro-v1:0
       TracingConfig:
         Mode: Active
 
