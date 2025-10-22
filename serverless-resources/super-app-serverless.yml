@@ -286,11 +286,6 @@ Resources:
       AuthorizationScopes:
         - openid
 
-  DocumentBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref DocumentBucketName
-
   DocumentLambda:
     Type: AWS::Lambda::Function
     Properties:
