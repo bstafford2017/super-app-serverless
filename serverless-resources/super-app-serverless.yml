@@ -233,6 +233,46 @@ Resources:
       AuthorizationScopes:
         - openid
 
+  WeatherLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: weather-lambda
+      Handler: src/handlers/weather.weather
+      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
+      Runtime: python3.14
+      Timeout: 6
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref LambdaDeploymentBucket
+        S3Key: weather-lambda.zip
+      TracingConfig:
+        Mode: Active
+
+  WeatherResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: weather
+      RestApiId: !Ref ApiGatewayRestApi
+
+  WeatherMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiGatewayCognitoAuthorizer
+      HttpMethod: POST
+      ResourceId: !Ref WeatherResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WeatherLambda.Arn}/invocations
+      MethodResponses:
+        - StatusCode: 200
+      AuthorizationScopes:
+        - openid
+
   # Lambda permissions for API Gateway
   AskLambdaInvokePermission:
     Type: AWS::Lambda::Permission
@@ -250,11 +290,20 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/recommend
 
+  WeatherLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt WeatherLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/weather
+
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
       - ApiGatewayMethod
       - AskMethod
+      - WeatherMethod
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       StageName: deployent-prod
@@ -318,6 +367,12 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: /aws/lambda/recommend-lambda
+      RetentionInDays: 7
+
+  WeatherLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/weather-lambda
       RetentionInDays: 7
 
   ApiGatewayExecutionLogGroup:

@@ -40,7 +40,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install awscli boto3
+          pip install -r requirements.txt
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -62,11 +62,13 @@ jobs:
         run: |
           zip -r ask-lambda.zip src/handlers/ask.py
           zip -r recommend-lambda.zip src/handlers/recommend.py
+          zip -r weather-lambda.zip src/handlers/weather.py
 
       - name: Upload Lambda functions to S3
         run: |
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
           aws s3 cp recommend-lambda.zip s3://${{ env.S3_BUCKET }}/recommend-lambda.zip
+          aws s3 cp weather-lambda.zip s3://${{ env.S3_BUCKET }}/weather-lambda.zip
 
       - name: Deploy Serverless AWS resources
         run: |
@@ -89,4 +91,9 @@ jobs:
             --function-name recommend-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
             --s3-key recommend-lambda.zip \
+            --region ${{ env.AWS_REGION }}
+          aws lambda update-function-code \
+            --function-name weather-lambda \
+            --s3-bucket ${{ env.S3_BUCKET }} \
+            --s3-key weather-lambda.zip \
             --region ${{ env.AWS_REGION }}
