@@ -78,6 +78,11 @@ jobs:
           cp src/handlers/weather.py build/weather/
           (cd build/weather && zip -r ../../weather-lambda.zip .)
 
+          # Document package
+          pip install -r requirements.txt -t build/document
+          cp src/handlers/document.py build/document/
+          (cd build/document && zip -r ../../document-lambda.zip .)
+
       - name: Upload Lambda functions to S3
         run: |
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
@@ -110,4 +115,9 @@ jobs:
             --function-name weather-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
             --s3-key weather-lambda.zip \
+            --region ${{ env.AWS_REGION }}
+          aws lambda update-function-code \
+            --function-name document-lambda \
+            --s3-bucket ${{ env.S3_BUCKET }} \
+            --s3-key document-lambda.zip \
             --region ${{ env.AWS_REGION }}
