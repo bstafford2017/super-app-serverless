@@ -1,11 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda Deployment S3 Bucket
 
+Parameters:
+  BucketName:
+    Type: String
+    Description: Name of the S3 bucket to deploy Lambda function code
+
 Resources:
   LambdaDeploymentBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: super-app-serverless-bucket
+      BucketName: !Ref BucketName
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:

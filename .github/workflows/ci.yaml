@@ -29,6 +29,7 @@ jobs:
     env:
       AWS_REGION: us-east-1
       S3_BUCKET: super-app-serverless-bucket
+      S3_DOCUMENTS_BUCKET: super-app-documents-bucket
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -49,6 +50,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Create Documents S3 bucket
+        run: |
+          aws cloudformation deploy \
+            --template-file serverless-resources/lambda-bucket.yml \
+            --stack-name super-app-documents-bucket-stack \
+            --region ${{ env.AWS_REGION }} \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides BucketName=${{ env.S3_DOCUMENTS_BUCKET }} \
+            --no-fail-on-empty-changeset
+
       - name: Create Lambda S3 bucket
         run: |
           aws cloudformation deploy \
@@ -56,6 +67,7 @@ jobs:
             --stack-name super-app-lambda-bucket-stack \
             --region ${{ env.AWS_REGION }} \
             --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides BucketName=${{ env.S3_BUCKET }} \
             --no-fail-on-empty-changeset
 
       - name: Zip functions
@@ -97,7 +109,7 @@ jobs:
             --region ${{ env.AWS_REGION }} \
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset \
-            --parameter-overrides LambdaDeploymentBucket=super-app-serverless-bucket
+            --parameter-overrides LambdaDeploymentBucket=super-app-serverless-bucket DocumentBucketName=super-app-documents-bucket
 
       - name: Update Lambda function code
         run: |

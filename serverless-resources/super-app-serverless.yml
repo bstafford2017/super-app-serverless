@@ -5,6 +5,9 @@ Parameters:
   LambdaDeploymentBucket:
     Type: String
     Description: Name of the S3 bucket for Lambda deployment packages
+  DocumentBucketName:
+    Type: String
+    Description: Name of the S3 bucket to store user documents
 
 Resources:
   # IAM Role for Lambda
@@ -286,7 +289,7 @@ Resources:
   DocumentBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'super-app-documents-bucket'
+      BucketName: !Ref DocumentBucketName
 
   DocumentLambda:
     Type: AWS::Lambda::Function
