@@ -29,6 +29,7 @@ jobs:
     env:
       AWS_REGION: us-east-1
       S3_BUCKET: super-app-serverless-bucket
+      S3_DOCUMENTS_BUCKET: super-app-documents-bucket
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -49,6 +50,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Create Documents S3 bucket
+        run: |
+          aws cloudformation deploy \
+            --template-file serverless-resources/lambda-bucket.yml \
+            --stack-name super-app-documents-bucket-stack \
+            --region ${{ env.AWS_REGION }} \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides BucketName=${{ env.S3_DOCUMENTS_BUCKET }} \
+            --no-fail-on-empty-changeset
+
       - name: Create Lambda S3 bucket
         run: |
           aws cloudformation deploy \
@@ -56,6 +67,7 @@ jobs:
             --stack-name super-app-lambda-bucket-stack \
             --region ${{ env.AWS_REGION }} \
             --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides BucketName=${{ env.S3_BUCKET }} \
             --no-fail-on-empty-changeset
 
       - name: Zip functions
@@ -78,11 +90,17 @@ jobs:
           cp src/handlers/weather.py build/weather/
           (cd build/weather && zip -r ../../weather-lambda.zip .)
 
+          # Document package
+          pip install -r requirements.txt -t build/document
+          cp src/handlers/document.py build/document/
+          (cd build/document && zip -r ../../document-lambda.zip .)
+
       - name: Upload Lambda functions to S3
         run: |
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
           aws s3 cp recommend-lambda.zip s3://${{ env.S3_BUCKET }}/recommend-lambda.zip
           aws s3 cp weather-lambda.zip s3://${{ env.S3_BUCKET }}/weather-lambda.zip
+          aws s3 cp document-lambda.zip s3://${{ env.S3_BUCKET }}/document-lambda.zip
 
       - name: Deploy Serverless AWS resources
         run: |
@@ -92,7 +110,7 @@ jobs:
             --region ${{ env.AWS_REGION }} \
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset \
-            --parameter-overrides LambdaDeploymentBucket=super-app-serverless-bucket
+            --parameter-overrides LambdaDeploymentBucket=super-app-serverless-bucket DocumentsBucket=super-app-documents-bucket
 
       - name: Update Lambda function code
         run: |
@@ -110,4 +128,9 @@ jobs:
             --function-name weather-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
             --s3-key weather-lambda.zip \
+            --region ${{ env.AWS_REGION }}
+          aws lambda update-function-code \
+            --function-name document-lambda \
+            --s3-bucket ${{ env.S3_BUCKET }} \
+            --s3-key document-lambda.zip \
             --region ${{ env.AWS_REGION }}

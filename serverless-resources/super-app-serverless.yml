@@ -5,6 +5,9 @@ Parameters:
   LambdaDeploymentBucket:
     Type: String
     Description: Name of the S3 bucket for Lambda deployment packages
+  DocumentsBucket:
+    Type: String
+    Description: Name of the S3 bucket to store user documents
 
 Resources:
   # IAM Role for Lambda
@@ -41,6 +44,16 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: 'arn:aws:logs:*:*:*'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - Fn::Sub: 'arn:aws:s3:::${DocumentsBucket}/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource:
+                  - Fn::Sub: 'arn:aws:s3:::${DocumentsBucket}'
               # Only for console implementation
               - Effect: Allow
                 Action:
@@ -273,6 +286,49 @@ Resources:
       AuthorizationScopes:
         - openid
 
+  DocumentLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: document-lambda
+      Handler: document.document
+      Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
+      Runtime: python3.13
+      Timeout: 10
+      MemorySize: 256
+      Code:
+        S3Bucket: !Ref LambdaDeploymentBucket
+        S3Key: document-lambda.zip
+      Environment:
+        Variables:
+          DOCUMENT_BUCKET: !Ref DocumentsBucket
+      TracingConfig:
+        Mode: Active
+
+  DocumentResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: document
+      RestApiId: !Ref ApiGatewayRestApi
+
+  DocumentMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref ApiGatewayCognitoAuthorizer
+      HttpMethod: POST
+      ResourceId: !Ref DocumentResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DocumentLambda.Arn}/invocations
+      MethodResponses:
+        - StatusCode: 200
+      AuthorizationScopes:
+        - openid
+
   # Lambda permissions for API Gateway
   AskLambdaInvokePermission:
     Type: AWS::Lambda::Permission
@@ -297,6 +353,14 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/weather
+
+  DocumentLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt DocumentLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/POST/document
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
@@ -373,6 +437,12 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: /aws/lambda/weather-lambda
+      RetentionInDays: 7
+
+  DocumentLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/document-lambda
       RetentionInDays: 7
 
   ApiGatewayExecutionLogGroup:
