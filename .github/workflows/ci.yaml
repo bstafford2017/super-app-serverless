@@ -100,6 +100,7 @@ jobs:
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
           aws s3 cp recommend-lambda.zip s3://${{ env.S3_BUCKET }}/recommend-lambda.zip
           aws s3 cp weather-lambda.zip s3://${{ env.S3_BUCKET }}/weather-lambda.zip
+          aws s3 cp document-lambda.zip s3://${{ env.S3_BUCKET }}/document-lambda.zip
 
       - name: Deploy Serverless AWS resources
         run: |
