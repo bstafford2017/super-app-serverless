@@ -13,11 +13,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.13'
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
-          pip install boto3
+          pip install -r requirements.txt
 
       - name: Run tests
         run: |
@@ -36,11 +36,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.13'
 
       - name: Install dependencies
         run: |
-          pip install awscli boto3
+          pip install -r requirements.txt
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -60,13 +60,29 @@ jobs:
 
       - name: Zip functions
         run: |
-          zip -r ask-lambda.zip src/handlers/ask.py
-          zip -r recommend-lambda.zip src/handlers/recommend.py
+          # Create isolated packages that include dependencies
+          rm -rf build && mkdir -p build/ask build/recommend build/weather
+
+          # Ask package
+          pip install -r requirements.txt -t build/ask
+          cp src/handlers/ask.py build/ask/
+          (cd build/ask && zip -r ../../ask-lambda.zip .)
+
+          # Recommend package
+          pip install -r requirements.txt -t build/recommend
+          cp src/handlers/recommend.py build/recommend/
+          (cd build/recommend && zip -r ../../recommend-lambda.zip .)
+
+          # Weather package
+          pip install -r requirements.txt -t build/weather
+          cp src/handlers/weather.py build/weather/
+          (cd build/weather && zip -r ../../weather-lambda.zip .)
 
       - name: Upload Lambda functions to S3
         run: |
           aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
           aws s3 cp recommend-lambda.zip s3://${{ env.S3_BUCKET }}/recommend-lambda.zip
+          aws s3 cp weather-lambda.zip s3://${{ env.S3_BUCKET }}/weather-lambda.zip
 
       - name: Deploy Serverless AWS resources
         run: |
@@ -89,4 +105,9 @@ jobs:
             --function-name recommend-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
             --s3-key recommend-lambda.zip \
+            --region ${{ env.AWS_REGION }}
+          aws lambda update-function-code \
+            --function-name weather-lambda \
+            --s3-bucket ${{ env.S3_BUCKET }} \
+            --s3-key weather-lambda.zip \
             --region ${{ env.AWS_REGION }}

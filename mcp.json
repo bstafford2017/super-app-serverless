@@ -1,0 +1,37 @@
+{
+  "name": "local-weather-mcp",
+  "version": "1.0.0",
+  "description": "MCP config for the Weather Lambda running as an MCP-compatible server",
+  "endpoint": {
+    "url": "https://www.the-super-app.com/stage-prod/weather",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <token>"
+    }
+  },
+  "schema": {
+    "input": {
+      "type": "object",
+      "required": ["lat", "lon"],
+      "properties": {
+        "lat": { "type": "number" },
+        "lon": { "type": "number" }
+      }
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" },
+        "metadata": { "type": "object" },
+        "payload": { "type": "object" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "name": "sf-weather",
+      "request": { "lat": 37.7749, "lon": -122.4194 }
+    }
+  ]
+}
