@@ -5,7 +5,7 @@ Parameters:
   LambdaDeploymentBucket:
     Type: String
     Description: Name of the S3 bucket for Lambda deployment packages
-  DocumentBucketName:
+  DocumentsBucket:
     Type: String
     Description: Name of the S3 bucket to store user documents
 
@@ -300,7 +300,7 @@ Resources:
         S3Key: document-lambda.zip
       Environment:
         Variables:
-          DOCUMENT_BUCKET: !Ref DocumentBucket
+          DOCUMENT_BUCKET: !Ref DocumentsBucket
       TracingConfig:
         Mode: Active
 
