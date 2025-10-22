@@ -60,9 +60,23 @@ jobs:
 
       - name: Zip functions
         run: |
-          zip -r ask-lambda.zip src/handlers/ask.py
-          zip -r recommend-lambda.zip src/handlers/recommend.py
-          zip -r weather-lambda.zip src/handlers/weather.py
+          # Create isolated packages that include dependencies
+          rm -rf build && mkdir -p build/ask build/recommend build/weather
+
+          # Ask package
+          pip install -r requirements.txt -t build/ask
+          cp src/handlers/ask.py build/ask/
+          (cd build/ask && zip -r ../../ask-lambda.zip .)
+
+          # Recommend package
+          pip install -r requirements.txt -t build/recommend
+          cp src/handlers/recommend.py build/recommend/
+          (cd build/recommend && zip -r ../../recommend-lambda.zip .)
+
+          # Weather package
+          pip install -r requirements.txt -t build/weather
+          cp src/handlers/weather.py build/weather/
+          (cd build/weather && zip -r ../../weather-lambda.zip .)
 
       - name: Upload Lambda functions to S3
         run: |
