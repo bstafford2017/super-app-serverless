@@ -48,12 +48,12 @@ Resources:
                 Action:
                   - s3:GetObject
                 Resource:
-                  - Fn::Sub: 'arn:aws:s3:::${LambdaDeploymentBucket}/*'
+                  - Fn::Sub: 'arn:aws:s3:::${DocumentsBucket}/*'
               - Effect: Allow
                 Action:
                   - s3:ListBucket
                 Resource:
-                  - Fn::Sub: 'arn:aws:s3:::${LambdaDeploymentBucket}'
+                  - Fn::Sub: 'arn:aws:s3:::${DocumentsBucket}'
               # Only for console implementation
               - Effect: Allow
                 Action:
