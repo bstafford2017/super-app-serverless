@@ -4,7 +4,7 @@ import boto3
 import traceback
 
 S3_CLIENT = boto3.client('s3')
-S3_BUCKET = os.environ.get('S3_BUCKET', '')
+S3_BUCKET = os.environ.get('S3_DOCUMENTS_BUCKET', 'super-app-documents-bucket')
 
 
 def document(event, context=None):
