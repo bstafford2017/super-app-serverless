@@ -118,7 +118,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: ask-lambda
-      Handler: ask.ask
+      Handler: ask.handler
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.13
       Timeout: 5
