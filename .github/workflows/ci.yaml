@@ -73,11 +73,12 @@ jobs:
       - name: Zip functions
         run: |
           # Create isolated packages that include dependencies
-          rm -rf build && mkdir -p build/ask build/recommend build/weather
+          rm -rf build && mkdir -p build/ask build/recommend build/weather build/document
 
-          # Ask package
+          # Ask package with agents
           pip install -r requirements.txt -t build/ask
           cp src/handlers/ask.py build/ask/
+          cp -r src/agents build/ask/
           (cd build/ask && zip -r ../../ask-lambda.zip .)
 
           # Recommend package
