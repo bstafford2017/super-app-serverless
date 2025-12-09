@@ -38,6 +38,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -72,36 +73,22 @@ jobs:
 
       - name: Zip functions
         run: |
-          # Create isolated packages that include dependencies
-          rm -rf build && mkdir -p build/ask build/recommend build/weather build/document
+          # Create single package with all handlers and dependencies
+          rm -rf build && mkdir -p build
+          
+          # Install dependencies
+          pip install -r requirements.txt -t build --no-cache-dir
+          
+          # Copy all handlers and agents
+          cp -r src/handlers/* build/
+          cp -r src/agents build/
+          
+          # Create single zip
+          (cd build && zip -r9 ../lambda-package.zip . -x "*.pyc" "**/__pycache__/*")
 
-          # Ask package with agents
-          pip install -r requirements.txt -t build/ask
-          cp src/handlers/ask.py build/ask/
-          cp -r src/agents build/ask/
-          (cd build/ask && zip -r ../../ask-lambda.zip .)
-
-          # Recommend package
-          pip install -r requirements.txt -t build/recommend
-          cp src/handlers/recommend.py build/recommend/
-          (cd build/recommend && zip -r ../../recommend-lambda.zip .)
-
-          # Weather package
-          pip install -r requirements.txt -t build/weather
-          cp src/handlers/weather.py build/weather/
-          (cd build/weather && zip -r ../../weather-lambda.zip .)
-
-          # Document package
-          pip install -r requirements.txt -t build/document
-          cp src/handlers/document.py build/document/
-          (cd build/document && zip -r ../../document-lambda.zip .)
-
-      - name: Upload Lambda functions to S3
+      - name: Upload Lambda package to S3
         run: |
-          aws s3 cp ask-lambda.zip s3://${{ env.S3_BUCKET }}/ask-lambda.zip
-          aws s3 cp recommend-lambda.zip s3://${{ env.S3_BUCKET }}/recommend-lambda.zip
-          aws s3 cp weather-lambda.zip s3://${{ env.S3_BUCKET }}/weather-lambda.zip
-          aws s3 cp document-lambda.zip s3://${{ env.S3_BUCKET }}/document-lambda.zip
+          aws s3 cp lambda-package.zip s3://${{ env.S3_BUCKET }}/lambda-package.zip --only-show-errors
 
       - name: Deploy Serverless AWS resources
         run: |
@@ -118,20 +105,21 @@ jobs:
           aws lambda update-function-code \
             --function-name ask-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
-            --s3-key ask-lambda.zip \
-            --region ${{ env.AWS_REGION }}
+            --s3-key lambda-package.zip \
+            --region ${{ env.AWS_REGION }} &
           aws lambda update-function-code \
             --function-name recommend-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
-            --s3-key recommend-lambda.zip \
-            --region ${{ env.AWS_REGION }}
+            --s3-key lambda-package.zip \
+            --region ${{ env.AWS_REGION }} &
           aws lambda update-function-code \
             --function-name weather-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
-            --s3-key weather-lambda.zip \
-            --region ${{ env.AWS_REGION }}
+            --s3-key lambda-package.zip \
+            --region ${{ env.AWS_REGION }} &
           aws lambda update-function-code \
             --function-name document-lambda \
             --s3-bucket ${{ env.S3_BUCKET }} \
-            --s3-key document-lambda.zip \
-            --region ${{ env.AWS_REGION }}
+            --s3-key lambda-package.zip \
+            --region ${{ env.AWS_REGION }} &
+          wait
