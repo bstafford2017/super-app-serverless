@@ -1,3 +1,4 @@
+import logging
 from strands import Agent
 from .config import model
 from .trivia import trivia_agent
@@ -7,6 +8,11 @@ from .technology import technology_agent
 from .art import art_agent
 from .geography import geography_agent
 from .health import health_agent
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+logger.info("Initializing supervisor agent with 7 specialized agents")
 
 supervisor = Agent(
     system_prompt="""You are a supervisor agent that routes questions to specialized experts.
