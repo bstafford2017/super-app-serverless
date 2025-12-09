@@ -1,78 +1,29 @@
-# Handler for fact endpoint
-import boto3
 import json
+import sys
 import os
-from datetime import datetime
-import traceback
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-# Initialize the Bedrock Runtime client
-bedrock_client = boto3.client('bedrock-runtime', region_name='us-east-1')
+from agents import supervisor
 
-# Use Amazon Nova Micro model
-BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', '')
-
-# Reduce max tokens to further cut costs
-MAX_TOKENS_TO_SAMPLE = 100
-
-def query_bedrock(prompt: str):
-    body = json.dumps({
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": MAX_TOKENS_TO_SAMPLE,
-        "temperature": 0.7,
-        "messages": [
-            {
-                "role": "user",
-                "content": [{"type": "text", "text": prompt}],
-            }
-        ],
-    })
-    response = bedrock_client.invoke_model(
-        modelId=BEDROCK_MODEL_ID,
-        body=body,
-        accept='application/json',
-        contentType='application/json'
-    )
-    response_body = response['body'].read().decode('utf-8')
-    # Parse the response
-    try:
-        result = json.loads(response_body)
-        # Try to extract content from the response
-        content = result.get("content", [])
-        if isinstance(content, list) and len(content) > 0 and isinstance(content[0], dict):
-            return content[0].get("text", "No results found.")
-        return "No results found."
-    except Exception:
-        return response_body
-
-
-def ask(event, context=None):
-    print('Request to /ask')
+def handler(event, context):
     try:
         body = json.loads(event['body'])
         user_prompt = body.get("prompt")
-    except Exception as e:
-        print(f'Error parsing request body: {e}')
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid request body'})
-        }
+        conversation_history = body.get("conversation_history", [])
+    except Exception:
+        return {'statusCode': 400, 'body': json.dumps({'error': 'Invalid request body'})}
 
     if not user_prompt:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Prompt is required'})
-        }
+        return {'statusCode': 400, 'body': json.dumps({'error': 'Prompt is required'})}
 
     try:
-        output = query_bedrock(user_prompt)
+        messages = conversation_history + [{"role": "user", "content": user_prompt}]
+        response = supervisor(messages if conversation_history else user_prompt)
         return {
             'statusCode': 200,
-            'body': json.dumps({'response': output})
+            'body': json.dumps({'response': str(response)})
         }
     except Exception as e:
         print(f'Error: {str(e)}')
-        traceback.print_exc()
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }
+        return {'statusCode': 500, 'body': json.dumps({'error': 'Internal server error'})}
+
