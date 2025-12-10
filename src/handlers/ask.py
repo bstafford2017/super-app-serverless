@@ -7,7 +7,7 @@ import logging
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.insert(0, '/var/task')
 
-from agents import supervisor
+from agents.supervisor import supervisor
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -29,9 +29,22 @@ def handler(event, context):
         return {'statusCode': 400, 'body': json.dumps({'error': 'Prompt is required'})}
 
     try:
-        messages = conversation_history + [{"role": "user", "content": user_prompt}]
         logger.info("Invoking supervisor agent")
-        response = supervisor(messages)
+        
+        # Build context from conversation history
+        context = ""
+        if conversation_history:
+            context = "Previous conversation:\n"
+            for msg in conversation_history:
+                role = msg.get('role', '')
+                content = msg.get('content', '')
+                context += f"{role}: {content}\n"
+            context += f"\nCurrent question: {user_prompt}"
+            prompt_with_context = context
+        else:
+            prompt_with_context = user_prompt
+        
+        response = supervisor(prompt_with_context)
         logger.info("Supervisor agent completed successfully")
         return {
             'statusCode': 200,

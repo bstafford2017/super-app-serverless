@@ -28,6 +28,5 @@ Available experts:
 
 Analyze the user's question and delegate to the most appropriate expert. Use conversation history to maintain context across interactions.""",
     model=model,
-    tools=[trivia_agent, math_agent, sports_agent, technology_agent, art_agent, geography_agent, health_agent],
-    conversation_manager=True
+    tools=[trivia_agent, math_agent, sports_agent, technology_agent, art_agent, geography_agent, health_agent]
 )
