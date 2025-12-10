@@ -13,7 +13,7 @@ bedrock_client = boto3.client('bedrock-runtime', region_name='us-east-1')
 BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', '')
 
 # Reduce max tokens to further cut costs
-MAX_TOKENS_TO_SAMPLE = 100
+MAX_TOKENS_TO_SAMPLE = 1000
 
 def query_bedrock(prompt: str):
     body = json.dumps({

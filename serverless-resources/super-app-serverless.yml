@@ -37,6 +37,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
                 Resource: '*'
               - Effect: Allow
                 Action:
@@ -118,11 +119,11 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: ask-lambda
-      Handler: ask.ask
+      Handler: ask.handler
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.13
-      Timeout: 5
-      MemorySize: 128
+      Timeout: 30
+      MemorySize: 512
       Code:
         S3Bucket: !Ref LambdaDeploymentBucket
         S3Key: ask-lambda.zip
@@ -141,8 +142,8 @@ Resources:
       Handler: recommend.recommend
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.13
-      Timeout: 5
-      MemorySize: 128
+      Timeout: 20
+      MemorySize: 256
       Code:
         S3Bucket: !Ref LambdaDeploymentBucket
         S3Key: recommend-lambda.zip
@@ -253,7 +254,7 @@ Resources:
       Handler: weather.weather
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.13
-      Timeout: 6
+      Timeout: 10
       MemorySize: 128
       Code:
         S3Bucket: !Ref LambdaDeploymentBucket
@@ -293,7 +294,7 @@ Resources:
       Handler: document.document
       Role: !GetAtt LambdaCognitoBedrockAccessRole.Arn
       Runtime: python3.13
-      Timeout: 10
+      Timeout: 15
       MemorySize: 256
       Code:
         S3Bucket: !Ref LambdaDeploymentBucket
