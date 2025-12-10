@@ -26,7 +26,8 @@ Available experts:
 - geography_agent: geography and places
 - health_agent: health and wellness
 
-Analyze the user's question and delegate to the most appropriate expert.""",
+Analyze the user's question and delegate to the most appropriate expert. Use conversation history to maintain context across interactions.""",
     model=model,
-    tools=[trivia_agent, math_agent, sports_agent, technology_agent, art_agent, geography_agent, health_agent]
+    tools=[trivia_agent, math_agent, sports_agent, technology_agent, art_agent, geography_agent, health_agent],
+    conversation_history=True
 )

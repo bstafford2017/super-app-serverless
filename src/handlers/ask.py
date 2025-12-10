@@ -31,7 +31,7 @@ def handler(event, context):
     try:
         messages = conversation_history + [{"role": "user", "content": user_prompt}]
         logger.info("Invoking supervisor agent")
-        response = supervisor(messages if conversation_history else user_prompt)
+        response = supervisor(messages)
         logger.info("Supervisor agent completed successfully")
         return {
             'statusCode': 200,
